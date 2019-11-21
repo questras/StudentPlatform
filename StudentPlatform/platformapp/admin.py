@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Group, Tab, Element, UserGroupRelation, Comment
+from .models import Group, Tab, Element, UserGroupRelation, Comment, GroupUser
 
 # Register your models here.
 admin.site.register(Group)
@@ -7,3 +7,4 @@ admin.site.register(Tab)
 admin.site.register(Element)
 admin.site.register(UserGroupRelation)
 admin.site.register(Comment)
+admin.site.register(GroupUser)
