@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import Group
+from .models import Group, UserGroupRelation
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -170,7 +170,16 @@ class CreateGroupTests(TestCase):
         created_group = Group.objects.all()
         self.assertEquals(len(created_group), 1)  # contains one group just created
 
-        self.assertEquals(created_group[0].name, 'n')
-        self.assertEquals(created_group[0].description, 'd')
-        self.assertEquals(created_group[0].creator, self.user)
-        self.assertEquals(created_group[0].share_url, 'placeholder.com')
+        created_group = created_group[0]
+
+        self.assertEquals(created_group.name, 'n')
+        self.assertEquals(created_group.description, 'd')
+        self.assertEquals(created_group.creator, self.user)
+        self.assertEquals(created_group.share_url, 'placeholder.com')
+
+        relation = UserGroupRelation.objects.all()
+        self.assertEquals(len(relation), 1)  # contains one relation just created
+
+        relation = relation[0]
+        self.assertEquals(relation.group, created_group)
+        self.assertEquals(relation.user, created_group.creator)

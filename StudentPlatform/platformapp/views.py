@@ -4,7 +4,7 @@ from platformapp.forms import RegistrationForm, CreateGroupForm
 from django.urls import reverse_lazy
 from django.views import generic
 from django.contrib.auth.decorators import login_required
-from .models import Group
+from .models import Group, UserGroupRelation
 
 
 def index(request):
@@ -42,7 +42,9 @@ def create_group(request):
             creator = request.user
             share_url = 'placeholder.com'  # placeholder for now
 
-            Group(name=name, description=description, creator=creator, share_url=share_url).save()
+            group = Group(name=name, description=description, creator=creator, share_url=share_url)
+            group.save()
+            UserGroupRelation(user=creator, group=group).save()
             return HttpResponseRedirect(reverse_lazy('index'))  # index as placeholder for now
     # when user opens view
     else:
