@@ -59,7 +59,7 @@ class UserGroupRelation(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)  # Group to which the user belongs
 
     def __str__(self):
-        return "{} belongs to {}".format(self.user.username, self.group.name)
+        return "{} belongs to {}".format(self.group.name, self.user.username)
 
 
 class Comment(models.Model):
