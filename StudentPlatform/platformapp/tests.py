@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import Group, UserGroupRelation
+from .models import Group, UserGroupRelation, Tab
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -20,6 +20,31 @@ def login_user(self, superuser=False):
 def redirect_next(url1, url2):
     """Return redirect url with 'next' attribute"""
     return '{}?next={}'.format(reverse(url1), reverse(url2))
+
+
+def create_group(creator):
+    """Create group for test purposes"""
+    group = Group(
+        name='t',
+        description='t',
+        creator=creator,
+        # TODO: change for real share url
+        share_url='placeholder.com'
+    )
+    group.save()
+    UserGroupRelation(group=group, user=creator).save()
+    return group
+
+
+def create_tab(creator, group):
+    """Create tab for test purposes"""
+    tab = Tab(
+        name='t',
+        creator=creator,
+        group=group,
+    )
+    tab.save()
+    return tab
 
 
 class IndexViewTests(TestCase):
@@ -165,7 +190,7 @@ class CreateGroupTests(TestCase):
 
         response = self.client.post(reverse('create_group'), {'name': 'n', 'description': 'd'})
         self.assertRedirects(response,
-                             expected_url=reverse('index'))  # for now placeholder: index, "groups" in the future
+                             expected_url=reverse('groups_view'))
 
         created_group = Group.objects.all()
         self.assertEquals(len(created_group), 1)  # contains one group just created
@@ -175,6 +200,7 @@ class CreateGroupTests(TestCase):
         self.assertEquals(created_group.name, 'n')
         self.assertEquals(created_group.description, 'd')
         self.assertEquals(created_group.creator, self.user)
+        # TODO: change to real share url
         self.assertEquals(created_group.share_url, 'placeholder.com')
 
         relation = UserGroupRelation.objects.all()
@@ -183,3 +209,122 @@ class CreateGroupTests(TestCase):
         relation = relation[0]
         self.assertEquals(relation.group, created_group)
         self.assertEquals(relation.user, created_group.creator)
+
+
+class GroupsViewTests(TestCase):
+    """Tests related to Groups view"""
+
+    def test_not_logged_in_cannot_access(self):
+        """Test: not logged in user is redirected, logged in user can access the view"""
+        response = self.client.get(reverse('groups_view'))
+        self.assertRedirects(response, expected_url=redirect_next('login', 'groups_view'))
+
+        login_user(self)
+        response = self.client.get(reverse('groups_view'))
+        self.assertEquals(response.status_code, 200)
+
+    def test_users_sees_their_groups(self):
+        """Test: user sees groups he belongs to, and no other ones"""
+        login_user(self)
+
+        # create different user and create group unseen for logged user
+        diff_user = User.objects.create_user(username='difftestuser', password='12345')
+        unseen_group = create_group(diff_user)
+
+        response = self.client.get(reverse('groups_view'))
+        groups = response.context['groups']
+        self.assertEquals(len(groups), 0)  # logged user should not see any groups
+
+        # create seen group
+        seen_group = create_group(self.user)
+
+        response = self.client.get(reverse('groups_view'))
+        groups = response.context['groups']
+        self.assertEquals(len(groups), 1)  # logged user should see only 1 group
+        self.assertTrue(seen_group in groups)
+        self.assertTrue(unseen_group not in groups)
+
+
+class ActivateGroupTests(TestCase):
+    """Tests related to activate_group view"""
+
+    def test_access_to_view(self):
+        """
+        Test: not logged in user is redirected,
+        logged in user who is in the group can access the view
+        """
+        # create different user and create group unseen for logged user
+        diff_user = User.objects.create_user(username='difftestuser', password='12345')
+        unseen_group = create_group(diff_user)
+
+        # activate group: not logged in user
+        response = self.client.get(reverse('activate_group', args=(unseen_group.id,)))
+        url1 = reverse('login')
+        url2 = reverse('activate_group', args=(unseen_group.id,))
+        expected_url = '{}?next={}'.format(url1, url2)
+        self.assertRedirects(response, expected_url=expected_url)
+
+        login_user(self)
+
+        # activate group: user not belonging to group
+        response = self.client.get(reverse('activate_group', args=(unseen_group.id,)))
+        self.assertRedirects(response, expected_url=reverse('groups_view'))
+
+        # create seen group
+        seen_group = create_group(self.user)
+
+        # activate group: user belonging to group
+        response = self.client.get(reverse('activate_group', args=(seen_group.id,)))
+        # TODO: change index for group_main_page
+        self.assertRedirects(response, expected_url=reverse('index'))
+
+    def test_sidebar_seen_when_group_activated(self):
+        """
+        Test: user sees sidebar when a groups is activated,
+         doesn't see it otherwise
+        """
+        response = self.client.get(reverse('index'))
+        self.assertNotContains(response, 'sidebar-sticky')
+
+        login_user(self)
+        response = self.client.get(reverse('index'))
+        self.assertNotContains(response, 'sidebar-sticky')
+
+        group = create_group(self.user)
+        self.client.post(reverse('activate_group', args=(group.id,)))
+        response = self.client.get(reverse('index'))
+
+        self.assertContains(response, 'sidebar-sticky')
+
+    def test_session_variable_after_clicking_group(self):
+        """Test: session variable is changed to clicked group"""
+        login_user(self)
+        group = create_group(self.user)
+        response = self.client.post(reverse('activate_group', args=(group.id,)))
+
+        # TODO: change index to group main page
+        self.assertRedirects(response, expected_url=reverse('index'))
+        self.assertEquals(self.client.session['group'], group.id)
+
+    def test_group_and_tabs_in_context(self):
+        """Test: current group and tabs are in context"""
+        # None when user is not logged in
+        response = self.client.get(reverse('index'))
+        self.assertTrue(response.context['group'] is None)
+        self.assertTrue(response.context['tabs'] is None)
+
+        # None when user is logged in but no group is activated
+        login_user(self)
+        response = self.client.get(reverse('index'))
+        self.assertTrue(response.context['group'] is None)
+        self.assertTrue(response.context['tabs'] is None)
+
+        group = create_group(self.user)
+        tab = create_tab(self.user, group)
+        self.client.post(reverse('activate_group', args=(group.id,)))
+
+        # When user is logged in and has activated group
+        response = self.client.get(reverse('index'))
+        self.assertTrue(response.context['group'] == group)
+        self.assertTrue(tab in response.context['tabs'])
+

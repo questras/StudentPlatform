@@ -24,7 +24,7 @@
     <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="{% url 'index' %}">Student Platform</a>
     <ul class="navbar-nav mr-auto">
         <li class="nav-item mr-4">
-            <a class="nav-link" href="">My Groups</a>
+            <a class="nav-link" href="{% url 'groups_view' %}">My Groups</a>
         </li>
         <li class="nav-item mr-4">
             <a class="nav-link" href="{% url 'create_group' %}">Create Group</a>
@@ -36,7 +36,7 @@
     <ul class="navbar-nav">
         {% if user.is_authenticated %}
             <div id="username" class="nav-link">{{ user.username }}</div>
-            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+            <a class="nav-link" href="{% url 'logout_view' %}">Logout</a>
         {% else %}
             <a class="nav-link" href="{% url 'signup' %}">Sign up</a>
             <a class="nav-link" href="{% url 'login' %}">Login</a>
@@ -49,7 +49,7 @@
 <div class="container-fluid pt-5">
     <div class="row">
         {# Group navbar if there is a group in session #}
-        {% if request.session.group != -1 %}
+        {% if group %}
             <nav class="col-md-2 d-none d-md-block bg-light sidebar">
                 <div class="sidebar-sticky">
                     {# List of group's specifications and tabs #}
@@ -57,7 +57,7 @@
                         {# Group name #}
                         <li class="nav-item">
                             <a id="group_name" class="nav-link mt-4" href="">
-                                Group Name
+                                {{ group.name}}
                             </a>
                         </li>
                         {# Edit group link #}
@@ -73,11 +73,15 @@
                             </a>
                         </li>
                         {# Group tabs #}
-                        <li class="nav-item">
-                            <a class="nav-link" href="">
-                                Tab name
-                            </a>
-                        </li>
+                        {% if tabs %}
+                            {% for tab in tabs %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="">
+                                        {{ tab.name }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        {% endif %}
                     </ul>
                 </div>
             </nav>

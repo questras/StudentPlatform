@@ -6,5 +6,8 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('signup/', views.SignUp.as_view(), name='signup'),
     path('login/', auth_views.LoginView.as_view(redirect_authenticated_user=True), name='login'),
+    path('logout/', views.logout_view, name='logout_view'),
     path('create_group/', views.create_group, name='create_group'),
+    path('groups/', views.groups_view, name='groups_view'),
+    path('groups/<int:group_id>/activate', views.activate_group, name='activate_group'),
 ]
