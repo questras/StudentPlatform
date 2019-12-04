@@ -280,8 +280,7 @@ class ActivateGroupTests(TestCase):
 
         # activate group: user belonging to group
         response = self.client.get(reverse('activate_group', args=(seen_group.id,)))
-        # TODO: change index for group_main_page
-        self.assertRedirects(response, expected_url=reverse('index'))
+        self.assertRedirects(response, expected_url=reverse('group_main'))
 
     def test_sidebar_seen_when_group_activated(self):
         """
@@ -307,8 +306,7 @@ class ActivateGroupTests(TestCase):
         group = create_group(self.user)
         response = self.client.post(reverse('activate_group', args=(group.id,)))
 
-        # TODO: change index to group main page
-        self.assertRedirects(response, expected_url=reverse('index'))
+        self.assertRedirects(response, expected_url=reverse('group_main'))
         self.assertEquals(self.client.session['group'], group.id)
 
     def test_group_and_tabs_in_context(self):
@@ -364,8 +362,7 @@ class CreateTabTests(TestCase):
         session.save()
 
         response = self.client.post(reverse('create_tab'), {'name': 'n'})
-        # TODO: change index for groups main page
-        self.assertRedirects(response, expected_url=reverse('index'))
+        self.assertRedirects(response, expected_url=reverse('group_main'))
 
         created_tabs = Tab.objects.all()
         self.assertEquals(len(created_tabs), 1)  # contains one tab just created
@@ -375,11 +372,45 @@ class CreateTabTests(TestCase):
         self.assertEquals(created_tab.group, group)
         self.assertEquals(created_tab.creator, self.user)
 
-"""
-group's main page tests:
-not logged/not belonging to group cant access
-belonging to group can access
-"""
+
+class GroupMainViewTests(TestCase):
+    """Tests related to group_main view"""
+
+    def test_access_to_view(self):
+        """
+        Test: cannot access view when: not logged or
+        group is not activated, can otherwise
+        """
+        # not logged in
+        response = self.client.get(reverse('group_main'))
+        self.assertRedirects(response, expected_url=redirect_next('login', 'group_main'))
+
+        login_user(self)
+        group = create_group(self.user)
+
+        # not activated group
+        response = self.client.get(reverse('group_main'))
+        self.assertRedirects(response, expected_url=reverse('groups_view'))
+
+        # activated group
+        activate_group(self, group)
+
+        response = self.client.get(reverse('group_main'))
+        self.assertEquals(response.status_code, 200)
+
+    def test_contains_group_details(self):
+        """Test: view contains group's name, description, creator, leave button"""
+        login_user(self)
+        group = create_group(self.user)
+        activate_group(self, group)
+
+        response = self.client.get(reverse('group_main'))
+        self.assertContains(response, group.name)
+        self.assertContains(response, group.description)
+        self.assertContains(response, group.creator.get_full_name())
+        self.assertContains(response, '<button class="btn btn-warning">Leave Group</button>')
+
+
 
 """
 search group tests:

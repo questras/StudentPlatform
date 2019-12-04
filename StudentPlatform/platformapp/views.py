@@ -134,8 +134,7 @@ def activate_group(request, group_id):
         return HttpResponseRedirect(reverse_lazy('groups_view'))
     else:
         request.session['group'] = group_id
-        # TODO: change index to group main page
-        return HttpResponseRedirect(reverse_lazy('index'))
+        return HttpResponseRedirect(reverse_lazy('group_main'))
 
 
 @login_required
@@ -154,8 +153,7 @@ def create_tab(request):
             tab = Tab(name=name, creator=creator, group=group)
             tab.save()
 
-            # TODO: change index for groups main page
-            return HttpResponseRedirect(reverse_lazy('index'))
+            return HttpResponseRedirect(reverse_lazy('group_main'))
     # when user opens view
     else:
         form = CreateTabForm
@@ -170,3 +168,18 @@ def create_tab(request):
     }
 
     return render(request, 'platformapp/create_tab.html', context)
+
+
+@login_required
+def group_main(request):
+    group = get_current_group(request)
+    if group is None:
+        return HttpResponseRedirect(reverse_lazy('groups_view'))
+
+    tabs = get_current_tabs(group)
+    context = {
+        'group': group,
+        'tabs': tabs,
+    }
+
+    return render(request, 'platformapp/group_main.html', context)
