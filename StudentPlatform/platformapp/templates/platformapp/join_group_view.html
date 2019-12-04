@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>{{ group_to_join.name }}</h2>
+    <h3>Description: {{ group_to_join.description }}</h3>
+    <h4>Creator: {{ group_to_join.creator.get_full_name }}</h4>
+    <h5>Would you like to join this group?</h5>
+    <a href="{% url 'join_group' group_to_join.id %}"><button class="btn btn-success">Join</button></a>
+    <a href="{% url 'index' %}"><button class="btn btn-danger">Cancel</button></a>
+{% endblock %}

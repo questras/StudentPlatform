@@ -28,10 +28,12 @@ def create_group(creator):
         name='t',
         description='t',
         creator=creator,
-        # TODO: change for real share url
         share_url='placeholder.com'
     )
     group.save()
+    group.share_url = reverse('join_group_view', args=(group.id,))
+    group.save()
+
     UserGroupRelation(group=group, user=creator).save()
     return group
 
@@ -205,8 +207,7 @@ class CreateGroupTests(TestCase):
         self.assertEquals(created_group.name, 'n')
         self.assertEquals(created_group.description, 'd')
         self.assertEquals(created_group.creator, self.user)
-        # TODO: change to real share url
-        self.assertEquals(created_group.share_url, 'placeholder.com')
+        self.assertEquals(created_group.share_url, reverse('join_group_view', args=(created_group.id,)))
 
         relation = UserGroupRelation.objects.all()
         self.assertEquals(len(relation), 1)  # contains one relation just created
@@ -411,25 +412,96 @@ class GroupMainViewTests(TestCase):
         self.assertContains(response, '<button class="btn btn-warning">Leave Group</button>')
 
 
+class JoinGroupViewTests(TestCase):
+    """Tests related to join_group_view."""
+
+    def test_access_to_view(self):
+        """Test: only logged in user who is not in this group can access join_group_view."""
+        diff_user = User.objects.create_user(username='difftestuser', password='12345')
+        group = create_group(diff_user)
+
+        # not logged in
+        response = self.client.get(reverse('join_group_view', args=(group.id,)))
+        self.assertEquals(response.status_code, 302)  # redirect code
+
+        # logged in
+        login_user(self)
+        response = self.client.get(reverse('join_group_view', args=(group.id,)))
+        self.assertEquals(response.status_code, 200)
+
+        # already in group
+        group = create_group(self.user)
+        response = self.client.get(reverse('join_group_view', args=(group.id,)))
+        self.assertRedirects(
+            response,
+            expected_url=reverse('activate_group', args=(group.id,)),
+            target_status_code=302
+        )
+
+    def test_contains_correct_elements(self):
+        """Test: join_group_view contains group's name and button to join and cancel"""
+        diff_user = User.objects.create_user(username='difftestuser', password='12345')
+        group = create_group(diff_user)
+
+        login_user(self)
+        response = self.client.get(reverse('join_group_view', args=(group.id,)))
+        self.assertContains(response, group.name)
+        self.assertContains(response, group.description)
+        self.assertContains(response, group.creator.get_full_name())
+        self.assertContains(response, '<button class="btn btn-success">Join</button>')
+        self.assertContains(response, '<button class="btn btn-danger">Cancel</button>')
+
+
+class JoinGroupTests(TestCase):
+    """Tests related to join_group functionality"""
+
+    def test_user_added_to_group(self):
+        """Test: user is added to group."""
+        diff_user = User.objects.create_user(username='difftestuser', password='12345')
+        group = create_group(diff_user)
+
+        login_user(self)
+        self.client.post(reverse('join_group', args=(group.id,)))
+
+        relations = UserGroupRelation.objects.all()
+        self.assertEquals(len(relations), 2)  # new relation and creator relation
+
+        relation = relations[1]
+        self.assertEquals(relation.group, group)
+        self.assertEquals(relation.user, self.user)
+
+    def test_user_redirected_to_activate_group(self):
+        """Test: user is redirected to activate_group of joined group."""
+        diff_user = User.objects.create_user(username='difftestuser', password='12345')
+        group = create_group(diff_user)
+
+        login_user(self)
+        response = self.client.post(reverse('join_group', args=(group.id,)))
+        self.assertRedirects(
+            response,
+            expected_url=reverse('activate_group', args=(group.id,)),
+            target_status_code=302
+        )
 
 """
 search group tests:
 - not logged cannot access
-- group with key word shown
+- group with key word shown: compare to name, description, creator
 - groups without keyword not shown
 """
 
 """
-join group tests:
-- not logged cannot access
-- joining group works: user added to relation
+tab page tests:
+access to view: only if group activated, cannot otherwise
+elements in view: create element for all, delete tab and edit tab button only for creator
+elements in this tab seen, others not
+
 """
 
 """
-delete group tests:
-not-logged/not owner cannot access
-owner can access
-group is actually deleted
+comments tests:
+comments seen
+comments can be created (if group activated and logged in)
 """
 
 """

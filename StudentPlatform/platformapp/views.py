@@ -1,8 +1,8 @@
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from platformapp.forms import RegistrationForm, CreateGroupForm
 from platformapp.forms import CreateTabForm
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views import generic
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -81,12 +81,20 @@ def create_group(request):
             name = form.cleaned_data['name']
             description = form.cleaned_data['description']
             creator = request.user
-            # TODO: Change placeholder to real share url
-            share_url = 'placeholder.com'
 
-            group = Group(name=name, description=description, creator=creator, share_url=share_url)
+            group = Group(
+                name=name,
+                description=description,
+                creator=creator,
+                share_url='placeholder.com'
+            )
+            # change share_url based on group's id
             group.save()
+            group.share_url = reverse('join_group_view', args=(group.id,))
+            group.save()
+
             UserGroupRelation(user=creator, group=group).save()
+
             return HttpResponseRedirect(reverse_lazy('groups_view'))
     # when user opens view
     else:
@@ -183,3 +191,41 @@ def group_main(request):
     }
 
     return render(request, 'platformapp/group_main.html', context)
+
+
+@login_required
+def join_group_view(request, join_group_id):
+    """A view to join a group."""
+    group_to_join = get_object_or_404(Group, pk=join_group_id)
+
+    # redirect if user already in this relation
+    existing_relation = UserGroupRelation.objects.filter(group=group_to_join, user=request.user)
+    if existing_relation:
+        return HttpResponseRedirect(reverse('activate_group', args=(join_group_id,)))
+
+    group = get_current_group(request)
+    tabs = get_current_tabs(group)
+
+    context = {
+        'group_to_join': group_to_join,
+        'group': group,
+        'tabs': tabs,
+    }
+
+    return render(request, 'platformapp/join_group_view.html', context)
+
+
+@login_required
+def join_group(request, join_group_id):
+    """Functionality to join a group."""
+    group_to_join = get_object_or_404(Group, pk=join_group_id)
+
+    # redirect if user already in this relation
+    existing_relation = UserGroupRelation.objects.filter(group=group_to_join, user=request.user)
+    if existing_relation:
+        return HttpResponseRedirect(reverse('activate_group', args=(join_group_id,)))
+
+    relation = UserGroupRelation(user=request.user, group=group_to_join)
+    relation.save()
+
+    return HttpResponseRedirect(reverse('activate_group', args=(join_group_id,)))

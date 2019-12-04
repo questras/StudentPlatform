@@ -17,7 +17,7 @@
                   <td><a href="{% url 'activate_group' group.pk %}">{{ group.name }}</a></td>
                   <td>{{ group.description }}</td>
                   <td>{{ group.creator.get_full_name }}</td>
-                  <td><a href="#">placeholder</a></td>
+                  <td><a href="{{ group.share_url }}">{{ group.share_url }}</a></td>
                 </tr>
             {% endfor %}
           </tbody>
