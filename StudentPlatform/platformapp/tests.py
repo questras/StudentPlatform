@@ -47,6 +47,11 @@ def create_tab(creator, group):
     return tab
 
 
+def activate_group(self, group):
+    """Activate group for test purposes"""
+    self.client.post(reverse('activate_group', args=(group.id,)))
+
+
 class IndexViewTests(TestCase):
     """Tests related to Index view"""
 
@@ -258,7 +263,7 @@ class ActivateGroupTests(TestCase):
         unseen_group = create_group(diff_user)
 
         # activate group: not logged in user
-        response = self.client.get(reverse('activate_group', args=(unseen_group.id,)))
+        response = self.client.post(reverse('activate_group', args=(unseen_group.id,)))
         url1 = reverse('login')
         url2 = reverse('activate_group', args=(unseen_group.id,))
         expected_url = '{}?next={}'.format(url1, url2)
@@ -328,3 +333,91 @@ class ActivateGroupTests(TestCase):
         self.assertTrue(response.context['group'] == group)
         self.assertTrue(tab in response.context['tabs'])
 
+
+class CreateTabTests(TestCase):
+    """Tests related to create_tab view"""
+
+    def test_access_to_view(self):
+        """Test: only accessable when group is activated"""
+        # not logged in
+        response = self.client.get(reverse('create_tab'))
+        self.assertRedirects(response, expected_url=redirect_next('login', 'create_tab'))
+
+        # logged in no group activated
+        login_user(self)
+        response = self.client.get(reverse('create_tab'))
+        self.assertRedirects(response, expected_url=reverse('groups_view'))
+
+        # logged in group activated
+        group = create_group(self.user)
+        activate_group(self, group)
+        response = self.client.get(reverse('create_tab'))
+        self.assertEquals(response.status_code, 200)
+
+    def test_user_can_create_tab(self):
+        """Test: user can create tab"""
+        login_user(self)
+        group = create_group(self.user)
+
+        session = self.client.session
+        session['group'] = group.id
+        session.save()
+
+        response = self.client.post(reverse('create_tab'), {'name': 'n'})
+        # TODO: change index for groups main page
+        self.assertRedirects(response, expected_url=reverse('index'))
+
+        created_tabs = Tab.objects.all()
+        self.assertEquals(len(created_tabs), 1)  # contains one tab just created
+
+        created_tab = created_tabs[0]
+        self.assertEquals(created_tab.name, 'n')
+        self.assertEquals(created_tab.group, group)
+        self.assertEquals(created_tab.creator, self.user)
+
+"""
+group's main page tests:
+not logged/not belonging to group cant access
+belonging to group can access
+"""
+
+"""
+search group tests:
+- not logged cannot access
+- group with key word shown
+- groups without keyword not shown
+"""
+
+"""
+join group tests:
+- not logged cannot access
+- joining group works: user added to relation
+"""
+
+"""
+delete group tests:
+not-logged/not owner cannot access
+owner can access
+group is actually deleted
+"""
+
+"""
+delete tab tests:
+not-logged/not owner cannot access
+owner can access if session is ok
+tab is actually deleted
+"""
+
+"""
+create element tests:
+not-logged cannot access
+logged can access if session is not -1
+form cannot be submitted with empty(required) fields
+"""
+
+"""
+delete element tests:
+not-logged/not owner cannot access
+owner can access if session is ok
+element is actually deleted
+"""

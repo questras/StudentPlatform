@@ -1,6 +1,7 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from platformapp.forms import RegistrationForm, CreateGroupForm
+from platformapp.forms import CreateTabForm
 from django.urls import reverse_lazy
 from django.views import generic
 from django.contrib.auth.decorators import login_required
@@ -135,3 +136,37 @@ def activate_group(request, group_id):
         request.session['group'] = group_id
         # TODO: change index to group main page
         return HttpResponseRedirect(reverse_lazy('index'))
+
+
+@login_required
+def create_tab(request):
+    """A view to create a tab."""
+    group = get_current_group(request)
+    if group is None:
+        return HttpResponseRedirect(reverse_lazy('groups_view'))
+
+    # when user tries to create a tab
+    if request.method == 'POST':
+        form = CreateTabForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            creator = request.user
+            tab = Tab(name=name, creator=creator, group=group)
+            tab.save()
+
+            # TODO: change index for groups main page
+            return HttpResponseRedirect(reverse_lazy('index'))
+    # when user opens view
+    else:
+        form = CreateTabForm
+
+    group = get_current_group(request)
+    tabs = get_current_tabs(group)
+
+    context = {
+        'form': form,
+        'group': group,
+        'tabs': tabs,
+    }
+
+    return render(request, 'platformapp/create_tab.html', context)
