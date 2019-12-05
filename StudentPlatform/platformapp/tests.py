@@ -483,9 +483,142 @@ class JoinGroupTests(TestCase):
             target_status_code=302
         )
 
+
+class SearchGroupView(TestCase):
+    """Tests related to search_group view"""
+
+    def test_access_to_view(self):
+        """Test: not logged users do not have access"""
+        # not logged
+        response = self.client.get(reverse('search_group'))
+        self.assertRedirects(response, expected_url=redirect_next('login', 'search_group'))
+
+        # logged in
+        login_user(self)
+        response = self.client.get(reverse('search_group'))
+        self.assertEquals(response.status_code, 200)
+
+    def test_page_content(self):
+        """Test: correct page content."""
+        login_user(self)
+        response = self.client.get(reverse('search_group'))
+
+        # No group searched for
+        self.assertContains(response, 'class="btn btn-primary"')
+        self.assertNotContains(response, '<table class="table table-striped table-sm">')
+
+        # Group searched for
+        group = create_group(self.user)
+        response = self.client.post(reverse('search_group'), {'search_query': 't'})
+        self.assertContains(response, 'class="btn btn-primary"')
+        self.assertContains(response, '<table class="table table-striped table-sm">')
+        self.assertTrue(group in response.context['search_result'])
+
+        # No group found
+        response = self.client.post(reverse('search_group'), {'search_query': 'ssss'})
+        self.assertNotContains(response, '<table class="table table-striped table-sm">')
+        self.assertContains(response, 'No results')
+
+    def test_searching_for_groups(self):
+        """Test: specific groups shown when searching and others not."""
+        login_user(self)
+        user1 = User.objects.create_user(
+            username='diff',
+            password='12345',
+            first_name='aleks',
+            last_name='skela')
+
+        user2 = User.objects.create_user(
+            username='ffid',
+            password='12345',
+            first_name='george',
+            last_name='egroeg')
+
+        group1 = Group(
+            name='g1',
+            description='desc1',
+            creator=user1,
+            share_url='placeholder.com'
+        )
+        group1.save()
+
+        group2 = Group(
+            name='abc2',
+            description='csed1',
+            creator=user2,
+            share_url='placeholder.com'
+        )
+        group2.save()
+
+        # queries regarding both groups
+        response = self.client.post(reverse('search_group'), {'search_query': 'sss'})
+        context = response.context['search_result']
+        self.assertTrue(group1 not in context)
+        self.assertTrue(group2 not in context)
+
+        response = self.client.post(reverse('search_group'), {'search_query': '1'})
+        context = response.context['search_result']
+        self.assertTrue(group1 in context)
+        self.assertTrue(group2 in context)
+
+        # search by names
+        response = self.client.post(reverse('search_group'), {'search_query': 'g1'})
+        context = response.context['search_result']
+        self.assertTrue(group1 in context)
+        self.assertTrue(group2 not in context)
+
+        response = self.client.post(reverse('search_group'), {'search_query': 'abc'})
+        context = response.context['search_result']
+        self.assertTrue(group1 not in context)
+        self.assertTrue(group2 in context)
+
+        # search by description
+        response = self.client.post(reverse('search_group'), {'search_query': 'desc'})
+        context = response.context['search_result']
+        self.assertTrue(group1 in context)
+        self.assertTrue(group2 not in context)
+
+        response = self.client.post(reverse('search_group'), {'search_query': 'csed'})
+        context = response.context['search_result']
+        self.assertTrue(group1 not in context)
+        self.assertTrue(group2 in context)
+
+        # search by creator's first and last name
+        response = self.client.post(reverse('search_group'), {'search_query': 'aleks'})
+        context = response.context['search_result']
+        self.assertTrue(group1 in context)
+        self.assertTrue(group2 not in context)
+
+        response = self.client.post(reverse('search_group'), {'search_query': 'skela'})
+        context = response.context['search_result']
+        self.assertTrue(group1 in context)
+        self.assertTrue(group2 not in context)
+
+        response = self.client.post(reverse('search_group'), {'search_query': 'george'})
+        context = response.context['search_result']
+        self.assertTrue(group1 not in context)
+        self.assertTrue(group2 in context)
+
+        response = self.client.post(reverse('search_group'), {'search_query': 'egroeg'})
+        context = response.context['search_result']
+        self.assertTrue(group1 not in context)
+        self.assertTrue(group2 in context)
+
+        # cannot search by username
+        response = self.client.post(reverse('search_group'), {'search_query': 'diff'})
+        context = response.context['search_result']
+        self.assertTrue(group1 not in context)
+        self.assertTrue(group2 not in context)
+
+        response = self.client.post(reverse('search_group'), {'search_query': 'ffid'})
+        context = response.context['search_result']
+        self.assertTrue(group1 not in context)
+        self.assertTrue(group2 not in context)
+
+
 """
 search group tests:
-- not logged cannot access
+- no table when no post request
 - group with key word shown: compare to name, description, creator
 - groups without keyword not shown
 """

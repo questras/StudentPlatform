@@ -5,8 +5,10 @@ from platformapp.forms import CreateTabForm
 from django.urls import reverse_lazy, reverse
 from django.views import generic
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
+from django.contrib.auth import logout, get_user_model
 from .models import Group, UserGroupRelation, Tab
+
+User = get_user_model()
 
 
 def get_current_group(request):
@@ -229,3 +231,49 @@ def join_group(request, join_group_id):
     relation.save()
 
     return HttpResponseRedirect(reverse('activate_group', args=(join_group_id,)))
+
+
+@login_required
+def search_group(request):
+    """A view to search for a group"""
+    group = get_current_group(request)
+    tabs = get_current_tabs(group)
+    context = {
+        'group': group,
+        'tabs': tabs,
+    }
+
+    if request.method == 'POST':
+        search_query = request.POST.get('search_query', '')
+
+        if search_query == '':
+            return render(request, 'platformapp/search_group.html', context)
+
+        found_groups = []
+        # search for name
+        for g in list(Group.objects.filter(name__contains=search_query)):
+            if g not in found_groups:
+                found_groups.append(g)
+
+        # search for description
+        for g in list(Group.objects.filter(description__contains=search_query)):
+            if g not in found_groups:
+                found_groups.append(g)
+
+        # search for creator's first name
+        users = list(User.objects.filter(first_name=search_query))
+        for user in users:
+            for g in list(Group.objects.filter(creator=user)):
+                if g not in found_groups:
+                    found_groups.append(g)
+
+        # search for creator's last name
+        users = list(User.objects.filter(last_name=search_query))
+        for user in users:
+            for g in list(Group.objects.filter(creator=user)):
+                if g not in found_groups:
+                    found_groups.append(g)
+
+        context['search_result'] = found_groups
+
+    return render(request, 'platformapp/search_group.html', context)
