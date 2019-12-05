@@ -616,12 +616,42 @@ class SearchGroupView(TestCase):
         self.assertTrue(group2 not in context)
 
 
-"""
-search group tests:
-- no table when no post request
-- group with key word shown: compare to name, description, creator
-- groups without keyword not shown
-"""
+class LeaveGroupTests(TestCase):
+    """Test related to leave_group functionality"""
+
+    def test_access_to_view(self):
+        """Test: only accessible when group is in current session."""
+        diffuser = User.objects.create_user(username='diff', password='12345')
+        group = create_group(diffuser)
+
+        # not logged in
+        response = self.client.get(reverse('leave_group', args=(group.id,)))
+        url1 = reverse('login')
+        url2 = reverse('leave_group', args=(group.id,))
+        redirect_url = '{}?next={}'.format(url1, url2)
+        self.assertRedirects(response, expected_url=redirect_url)
+
+        # user logged in but group not in session
+        login_user(self)
+        group = create_group(self.user)
+
+        response = self.client.get(reverse('leave_group', args=(group.id,)))
+        self.assertEquals(response.status_code, 302)
+
+        relations = UserGroupRelation.objects.all()  # should be two
+        self.assertEquals(len(relations), 2)
+
+        # user logged in and group in session
+        activate_group(self, group)
+
+        self.client.get(reverse('leave_group', args=(group.id,)))
+
+        relations = UserGroupRelation.objects.all()  # should be one
+        self.assertEquals(len(relations), 1)
+
+        # leaving session
+        self.assertEquals(self.client.session['group'], -1)
+
 
 """
 tab page tests:

@@ -5,8 +5,7 @@
     <h3>Description: {{ group.description }}</h3>
     <h4>Creator: {{ group.creator.get_full_name }}</h4>
 
-    {# TODO: change index to leave_group view   #}
-    <a href="{% url 'index' %}">
+    <a href="{% url 'leave_group' group.id %}">
         <button class="btn btn-warning">Leave Group</button>
     </a>
 {% endblock %}

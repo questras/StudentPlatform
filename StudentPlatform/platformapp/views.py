@@ -277,3 +277,16 @@ def search_group(request):
         context['search_result'] = found_groups
 
     return render(request, 'platformapp/search_group.html', context)
+
+
+@login_required
+def leave_group(request, leaving_group_id):
+    """A functionality to leave group"""
+    session_group = get_current_group(request)
+
+    if session_group is not None and session_group.id == leaving_group_id:
+        relation = UserGroupRelation.objects.filter(group=leaving_group_id, user=request.user)
+        relation.delete()
+        request.session['group'] = -1
+
+    return HttpResponseRedirect(reverse_lazy('groups_view'))
