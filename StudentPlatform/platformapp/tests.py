@@ -653,6 +653,53 @@ class LeaveGroupTests(TestCase):
         self.assertEquals(self.client.session['group'], -1)
 
 
+class DeleteTabTests(TestCase):
+    """Tests related to delete_tab functionality"""
+
+    def test_access_to_view(self):
+        """Test: only owner with group in current session can access"""
+        # not logged in
+        diffuser = User.objects.create_user(username='diff', password='12345')
+        group1 = create_group(diffuser)
+        tab1 = create_tab(diffuser, group1)
+
+        response = self.client.get(reverse('delete_tab', args=(tab1.id,)))
+        url1 = reverse('login')
+        url2 = reverse('delete_tab', args=(tab1.id,))
+        redirect_url = '{}?next={}'.format(url1, url2)
+        self.assertRedirects(response, expected_url=redirect_url)
+
+        # user logged in but group not in session
+        login_user(self)
+        group2 = create_group(self.user)
+        tab2 = create_tab(self.user, group2)
+        activate_group(self, group2)
+
+        response = self.client.get(reverse('delete_tab', args=(tab1.id,)))
+        self.assertRedirects(response, reverse('groups_view'))
+        tabs = Tab.objects.all()
+        self.assertEquals(len(tabs), 2)
+
+        relation = UserGroupRelation(user=self.user, group=group1)
+        relation.save()
+
+        # user logged in, group in session but not owner
+        activate_group(self, group1)
+        response = self.client.get(reverse('delete_tab', args=(tab1.id,)))
+        self.assertRedirects(response, reverse('group_main'))
+
+        tabs = Tab.objects.all()
+        self.assertEquals(len(tabs), 2)
+
+        # user logged in, group in session and owner
+        activate_group(self, group2)
+        self.client.get(reverse('delete_tab', args=(tab2.id,)))
+        self.assertRedirects(response, reverse('group_main'))
+
+        tabs = Tab.objects.all()
+        self.assertEquals(len(tabs), 1)
+
+
 """
 tab page tests:
 access to view: only if group activated, cannot otherwise
@@ -665,13 +712,6 @@ elements in this tab seen, others not
 comments tests:
 comments seen
 comments can be created (if group activated and logged in)
-"""
-
-"""
-delete tab tests:
-not-logged/not owner cannot access
-owner can access if session is ok
-tab is actually deleted
 """
 
 """

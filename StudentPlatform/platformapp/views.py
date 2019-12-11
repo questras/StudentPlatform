@@ -290,3 +290,21 @@ def leave_group(request, leaving_group_id):
         request.session['group'] = -1
 
     return HttpResponseRedirect(reverse_lazy('groups_view'))
+
+
+@login_required
+def delete_tab(request, deleting_tab_id):
+    """A functionality to delete tab"""
+    session_group = get_current_group(request)
+
+    if session_group is None:
+        return HttpResponseRedirect(reverse_lazy('groups_view'))
+    else:
+        tab = get_object_or_404(Tab, pk=deleting_tab_id)
+        if tab.creator == request.user and tab.group == session_group:
+            tab.delete()
+            return HttpResponseRedirect(reverse_lazy('group_main'))
+        elif tab.group != session_group:
+            return HttpResponseRedirect(reverse_lazy('groups_view'))
+        else:
+            return HttpResponseRedirect(reverse_lazy('group_main'))
