@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import Group, UserGroupRelation, Tab
+from .models import Group, UserGroupRelation, Tab, Element
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -47,6 +47,18 @@ def create_tab(creator, group):
     )
     tab.save()
     return tab
+
+
+def create_element(user, tab, name='testelement', text='testtext'):
+    """Create element for test purposes"""
+    element = Element(
+        name=name,
+        creator=user,
+        text=text,
+        tab=tab,
+    )
+    element.save()
+    return element
 
 
 def activate_group(self, group):
@@ -700,18 +712,85 @@ class DeleteTabTests(TestCase):
         self.assertEquals(len(tabs), 1)
 
 
-"""
-tab page tests:
-access to view: only if group activated, cannot otherwise
-elements in view: create element for all, delete tab and edit tab button only for creator
-elements in this tab seen, others not
+class TabViewTests(TestCase):
+    """Tests related to tab_view"""
 
-"""
+    def test_access_to_view(self):
+        """Test: only accessible when tab's group is activated"""
+        # not logged in
+        diffuser = User.objects.create_user(username='diff', password='12345')
+        group1 = create_group(diffuser)
+        tab1 = create_tab(diffuser, group1)
+
+        response = self.client.get(reverse('tab_view', args=(tab1.id,)))
+        url1 = reverse('login')
+        url2 = reverse('tab_view', args=(tab1.id,))
+        redirect_url = '{}?next={}'.format(url1, url2)
+        self.assertRedirects(response, expected_url=redirect_url)
+
+        # user logged in but group not in session
+        login_user(self)
+        group2 = create_group(self.user)
+        tab2 = create_tab(self.user, group2)
+        activate_group(self, group2)  # activate group2 but request for tab in group1
+
+        response = self.client.get(reverse('tab_view', args=(tab1.id,)))
+        self.assertRedirects(response, reverse('groups_view'))
+
+        # user logged in, group in session
+        activate_group(self, group2)
+        response = self.client.get(reverse('tab_view', args=(tab2.id,)))
+        self.assertEquals(response.status_code, 200)
+
+    def test_view_content(self):
+        """
+        Test: create_element button and elements are visible for all,
+        delete_tab and edit_tab buttons are visible only for creator
+        """
+        login_user(self)
+        diffuser = User.objects.create_user(username='diff', password='12345')
+
+        group1 = create_group(self.user)
+        group2 = create_group(diffuser)
+
+        tab1 = create_tab(diffuser, group1)
+        tab2 = create_tab(self.user, group1)
+        tab3 = create_tab(diffuser, group2)
+
+        element1 = create_element(diffuser, tab1)
+        element2 = create_element(self.user, tab2)
+        element3 = create_element(diffuser, tab3)
+
+        activate_group(self, group1)
+
+        create_element_button = '<button class="btn btn-primary mb-4">Create Element</button>'
+        edit_tab_button = '<button class="btn btn-info ml-2 mb-4">Edit Tab</button>'
+        delete_tab_button = '<button class="btn btn-danger ml-2 mb-4">Delete Tab</button>'
+
+        # tab not created by logged in user
+        response = self.client.get(reverse('tab_view', args=(tab1.id,)))
+        self.assertContains(response, create_element_button)
+        self.assertNotContains(response, edit_tab_button)
+        self.assertNotContains(response, delete_tab_button)
+        self.assertTrue(element1 in response.context['elements'])
+        self.assertTrue(element2 not in response.context['elements'])
+        self.assertTrue(element3 not in response.context['elements'])
+
+        # tab created by logged in user
+        response = self.client.get(reverse('tab_view', args=(tab2.id,)))
+        self.assertContains(response, create_element_button)
+        self.assertContains(response, edit_tab_button)
+        self.assertContains(response, delete_tab_button)
+        self.assertTrue(element1 not in response.context['elements'])
+        self.assertTrue(element2 in response.context['elements'])
+        self.assertTrue(element3 not in response.context['elements'])
+
 
 """
 comments tests:
 comments seen
 comments can be created (if group activated and logged in)
+comments can be deleted by creators
 """
 
 """
@@ -726,4 +805,17 @@ delete element tests:
 not-logged/not owner cannot access
 owner can access if session is ok
 element is actually deleted
+"""
+"""
+element in tab_view tests:
+everything what should be visible is visible
+"""
+"""
+Edit tab tests
+"""
+"""
+Edit group tests
+"""
+"""
+Edit element tests
 """

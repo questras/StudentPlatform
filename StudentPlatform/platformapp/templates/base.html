@@ -56,12 +56,14 @@
                     <ul class="nav flex-column">
                         {# Group name #}
                         <li class="nav-item">
+                            {# TODO: place group main view url here #}
                             <a id="group_name" class="nav-link mt-4" href="">
                                 {{ group.name}}
                             </a>
                         </li>
                         {# Edit group link #}
                         <li class="nav-item">
+                            {# TODO: place edit group url here #}
                             <a id="edit_group" class="nav-link" href="">
                                 Edit Group
                             </a>
@@ -76,7 +78,7 @@
                         {% if tabs %}
                             {% for tab in tabs %}
                                 <li class="nav-item">
-                                    <a class="nav-link" href="">
+                                    <a class="nav-link" href="{% url 'tab_view' tab.id %}">
                                         {{ tab.name }}
                                     </a>
                                 </li>

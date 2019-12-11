@@ -17,5 +17,6 @@ urlpatterns = [
     path('<int:join_group_id>/join/', views.join_group, name='join_group'),
     path('<int:leaving_group_id>/leave/', views.leave_group, name='leave_group'),
     path('<int:deleting_tab_id>/delete_tab/', views.delete_tab, name='delete_tab'),
+    path('tab/<int:tab_id>/', views.tab_view, name='tab_view'),
 
 ]

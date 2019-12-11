@@ -6,7 +6,7 @@ from django.urls import reverse_lazy, reverse
 from django.views import generic
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout, get_user_model
-from .models import Group, UserGroupRelation, Tab
+from .models import Group, UserGroupRelation, Tab, Element
 
 User = get_user_model()
 
@@ -308,3 +308,27 @@ def delete_tab(request, deleting_tab_id):
             return HttpResponseRedirect(reverse_lazy('groups_view'))
         else:
             return HttpResponseRedirect(reverse_lazy('group_main'))
+
+
+@login_required
+def tab_view(request, tab_id):
+    """A view of a Tab"""
+    session_group = get_current_group(request)
+    session_tabs = get_current_tabs(session_group)
+
+    if session_group is None:
+        return HttpResponseRedirect(reverse_lazy('groups_view'))
+    else:
+        tab = get_object_or_404(Tab, pk=tab_id)  # get requested tab
+        if tab.group != session_group:
+            return HttpResponseRedirect(reverse_lazy('groups_view'))
+        else:
+            elements = list(Element.objects.filter(tab=tab))
+            context = {
+                'group': session_group,
+                'tabs': session_tabs,
+                'tab': tab,
+                'elements': elements,
+            }
+
+            return render(request, 'platformapp/tab_view.html', context)
