@@ -25,7 +25,7 @@ class Group(models.Model):
     name = models.CharField(max_length=40)
     description = models.CharField(max_length=90)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
-    users = models.ManyToManyField(User, related_name='my_groups')
+    users = models.ManyToManyField(User, related_name='joined_groups')
     share_url = models.URLField()
 
     def __str__(self):
