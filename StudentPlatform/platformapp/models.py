@@ -13,66 +13,58 @@ User = get_user_model()
 
 
 class Group(models.Model):
-    """A model containing specification of a Group."""
-    name = models.CharField(max_length=40)  # Name of the group
-    description = models.CharField(max_length=90)  # Description of the group
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)  # User that created the group
-    share_url = models.URLField()  # Url to join the group
+    """
+    Group model.
+    Fields:
+        name:           name of the group,
+        description:    description of the group,
+        creator:        user that created the group,
+        users:          users in the group,
+        share_url:      url that enables to join the group.
+    """
+    name = models.CharField(max_length=40)
+    description = models.CharField(max_length=90)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    users = models.ManyToManyField(User, related_name='my_groups')
+    share_url = models.URLField()
 
     def __str__(self):
-        return "{} created by {}".format(self.name, self.creator.username)
+        return '{} created by {}.'.format(self.name, self.creator.username)
 
 
 class Tab(models.Model):
-    """A model containing specification of a Tab in a Group."""
-    name = models.CharField(max_length=45)  # Name of the tab
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)  # User that created the tab
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)  # Group that holds the tab
+    """
+    Tab model.
+    Fields:
+        name:       name of the tab,
+        creator:    user that created the tab,
+        group:      group that the tab belongs to.
+    """
+    name = models.CharField(max_length=45)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
 
     def __str__(self):
-        return "{} -> {} created by {}".format(self.group.name, self.name, self.creator.username)
+        return f'{self.group.name} -> {self.name} ' \
+               f'created by {self.creator.username}'
 
 
 class Element(models.Model):
-    """A model containing specification of an Element in a Tab."""
-    name = models.CharField(max_length=45)  # Name of the element
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)  # User that created the element
-    text = models.TextField()  # Text area where user can write
-    image = models.ImageField(upload_to='images/')  # An image added to the element by user
-    tab = models.ForeignKey(Tab, on_delete=models.CASCADE)  # Tab that holds the element
-
-    def __str__(self):
-        return "{}->{}->{} created by {}".format(
-            self.tab.group.name,
-            self.tab.name,
-            self.name,
-            self.creator.username
-        )
-
-
-class UserGroupRelation(models.Model):
     """
-    A relation between user and group i.e which user
-    belongs to which group
+    Element model.
+    Fields:
+        name:       name of the element,
+        creator:    user that created the element,
+        text:       text of the element,
+        image:      image in element,
+        tab:        tab that the element belongs to.
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE)  # User belonging to the group
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)  # Group to which the user belongs
+    name = models.CharField(max_length=45)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
+    image = models.ImageField(upload_to='images/')
+    tab = models.ForeignKey(Tab, on_delete=models.CASCADE)
 
     def __str__(self):
-        return "{} belongs to {}".format(self.group.name, self.user.username)
-
-
-class Comment(models.Model):
-    """A model containing specification of comments in an element."""
-    content = models.TextField()  # Text area where user can write comment text
-    date = models.DateTimeField(auto_now_add=True)  # Auto added date of publishing of the comment
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)  # User that added the comment
-    element = models.ForeignKey(Element, on_delete=models.CASCADE)  # Element which is commented
-
-    def __str__(self):
-        return "{}->{}->{}->comment created by {}".format(
-            self.element.tab.group.name,
-            self.element.tab.name,
-            self.element.name,
-            self.creator.username
-        )
+        return f'{self.tab.group.name}->{self.tab.name}->{self.name} ' \
+               f'created by {self.creator.username}'
