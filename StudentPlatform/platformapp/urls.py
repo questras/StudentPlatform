@@ -1,22 +1,37 @@
 from django.urls import path
-from django.contrib.auth import views as auth_views
-from . import views
+
+from .views.authentication_views import *
+from .views.index_views import *
+from .views.group_views import *
+from .views.tab_views import *
+from .views.element_views import *
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('signup/', views.SignUp.as_view(), name='signup'),
-    path('login/', auth_views.LoginView.as_view(redirect_authenticated_user=True), name='login'),
-    path('logout/', views.logout_view, name='logout_view'),
-    path('create_group/', views.create_group, name='create_group'),
-    path('create_tab/', views.create_tab, name='create_tab'),
-    path('groups/', views.groups_view, name='groups_view'),
-    path('groups/<int:group_id>/activate', views.activate_group, name='activate_group'),
-    path('group_main/', views.group_main, name='group_main'),
-    path('search_group/', views.search_group, name='search_group'),
-    path('<int:join_group_id>/join_group/', views.join_group_view, name='join_group_view'),
-    path('<int:join_group_id>/join/', views.join_group, name='join_group'),
-    path('<int:leaving_group_id>/leave/', views.leave_group, name='leave_group'),
-    path('<int:deleting_tab_id>/delete_tab/', views.delete_tab, name='delete_tab'),
-    path('tab/<int:tab_id>/', views.tab_view, name='tab_view'),
-
+    # Index views:
+    path('', index_view, name='index_view'),
+    path('feed/', feed_view, name='feed_view'),
+    # Authentication views:
+    path('auth/signup/', SignUpView.as_view(), name='signup_view'),
+    path('auth/login/', LoginView.as_view(), name='login_view'),
+    path('auth/logout/', logout_view, name='logout_view'),
+    # Group views:
+    path('group/<int:pk>/', group_view, name='main_group_view'),
+    path('group/<int:pk>/update/', UpdateView.as_view(), name='update_group_view'),
+    path('group/<int:pk>/delete/', DeleteView.as_view(), name='delete_group_view'),
+    path('group/<int:pk>/leave/', leave_group_view, name='leave_group_view'),
+    path('create_group/', CreateGroupView.as_view(), name='create_group_view'),
+    path('my_groups/', my_groups_view, name='my_groups_view'),
+    path('join_group/', join_group_view, name='join_group_view'),
+    path('search_groups', search_groups_view, name='search_groups_view'),
+    # Tab views:
+    path('group/<int:g_pk>/create_tab/', CreateTabView.as_view(), name='create_tab_view'),
+    path('group/<int:g_pk>/tab/<int:pk>/update/', UpdateTabView.as_view(), name='update_tab_view'),
+    path('group/<int:g_pk>/tab/<int:pk>/delete/', DeleteTabView.as_view(), name='delete_tab_view'),
+    # Element views:
+    path('group/<int:g_pk>/tab/<int:t_pk>/create_element/', CreateElementView.as_view(), name='create_element_view'),
+    path('group/<int:g_pk>/tab/<int:t_pk>/element/<int:pk>/', element_view, name='element_view'),
+    path('group/<int:g_pk>/tab/<int:t_pk>/element/<int:pk>/update', UpdateElementView.as_view(),
+         name='update_element_view'),
+    path('group/<int:g_pk>/tab/<int:t_pk>/element/<int:pk>/delete', DeleteElementView.as_view(),
+         name='delete_element_view'),
 ]
