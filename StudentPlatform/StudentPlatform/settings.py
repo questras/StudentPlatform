@@ -123,8 +123,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Login and logout redirect urls
 
-LOGIN_URL = '/platformapp/login/'
-LOGIN_REDIRECT_URL = '/platformapp/'
+LOGIN_URL = '/platformapp/auth/login/'
+LOGIN_REDIRECT_URL = '/platformapp/feed/'
 LOGOUT_REDIRECT_URL = '/platformapp/'
 
 # Crispy Forms
