@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, reverse
+from django.contrib.auth.decorators import login_required
 
 
 def index_view(request):
@@ -14,5 +15,8 @@ def index_view(request):
     return render(request, 'platformapp/index_view.html', {})
 
 
+@login_required
 def feed_view(request):
-    pass
+    """TODO: Implement feed_view"""
+
+    return render(request, 'platformapp/feed_view.html', {})
