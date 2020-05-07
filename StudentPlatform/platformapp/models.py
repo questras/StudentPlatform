@@ -13,8 +13,8 @@ User = get_user_model()
 
 
 class Group(models.Model):
-    """
-    Group model.
+    """Group model.
+
     Fields:
         name:           name of the group,
         description:    description of the group,
@@ -33,8 +33,8 @@ class Group(models.Model):
 
 
 class Tab(models.Model):
-    """
-    Tab model.
+    """Tab model.
+
     Fields:
         name:       name of the tab,
         creator:    user that created the tab,
@@ -50,8 +50,8 @@ class Tab(models.Model):
 
 
 class Element(models.Model):
-    """
-    Element model.
+    """Element model.
+    
     Fields:
         name:       name of the element,
         creator:    user that created the element,
