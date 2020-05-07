@@ -6,15 +6,6 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-def create_test_user(name, password):
-    """Create test user for testing purposes."""
-
-    user = User.objects.create_user(username=name, password=password)
-    user.save()
-
-    return user
-
-
 class IndexViewTests(TestCase):
     """Tests for index_view"""
 
