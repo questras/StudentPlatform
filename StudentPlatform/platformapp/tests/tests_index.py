@@ -9,8 +9,8 @@ User = get_user_model()
 class IndexViewTests(TestCase):
     """Tests for index_view"""
 
-    def authenticate(self, name, password):
-        """Create test user and authenticate for testing purposes."""
+    def create_user(self, name, password):
+        """Create test user for testing purposes."""
         self.user = User.objects.create_user(username=name, password=password)
 
     def test_not_logged_user_can_access_index_view(self):
@@ -21,7 +21,7 @@ class IndexViewTests(TestCase):
 
     def test_logged_user_is_redirected_to_feed(self):
         """Test if logged user is redirected to feed_view"""
-        self.authenticate('test', 'test')
+        self.create_user('test', 'test')
 
         is_logged = self.client.login(username='test', password='test')
         self.assertTrue(is_logged)
