@@ -20,13 +20,11 @@ class Group(models.Model):
         description:    description of the group,
         creator:        user that created the group,
         users:          users in the group,
-        share_url:      url that enables to join the group.
     """
     name = models.CharField(max_length=40)
     description = models.CharField(max_length=90)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     users = models.ManyToManyField(User, related_name='joined_groups')
-    share_url = models.URLField()
 
     def __str__(self):
         return '{} created by {}.'.format(self.name, self.creator.username)
@@ -51,7 +49,7 @@ class Tab(models.Model):
 
 class Element(models.Model):
     """Element model.
-    
+
     Fields:
         name:       name of the element,
         creator:    user that created the element,
