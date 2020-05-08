@@ -1,7 +1,8 @@
-from django.shortcuts import redirect
+from django.shortcuts import redirect, reverse
 from django.urls import reverse_lazy
 from django.contrib.auth import views as auth_views
 from django.views.generic.edit import CreateView
+from django.contrib.auth import logout
 
 from ..forms import RegistrationForm
 
@@ -33,4 +34,9 @@ class SignUpView(CreateView):
 
 
 def logout_view(request):
-    pass
+    """A view to logout."""
+
+    if request.user.is_authenticated:
+        logout(request)
+
+    return redirect(reverse('index_view'))
