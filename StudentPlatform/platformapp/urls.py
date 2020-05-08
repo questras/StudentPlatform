@@ -21,7 +21,7 @@ urlpatterns = [
     path('group/<int:pk>/leave/', leave_group_view, name='leave_group_view'),
     path('create_group/', CreateGroupView.as_view(), name='create_group_view'),
     path('my_groups/', my_groups_view, name='my_groups_view'),
-    path('join_group/', join_group_view, name='join_group_view'),
+    path('join_group/<int:pk>/', join_group_view, name='join_group_view'),
     path('search_groups', search_groups_view, name='search_groups_view'),
     # Tab views:
     path('group/<int:g_pk>/create_tab/', CreateTabView.as_view(), name='create_tab_view'),

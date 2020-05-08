@@ -1,6 +1,7 @@
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import reverse, render
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import reverse, render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 
 from ..models import Group
@@ -50,11 +51,26 @@ def group_view(request, pk):
 
 
 def my_groups_view(request):
-    pass
+    return render(request, 'platformapp/groups_view.html', {})
 
 
-def join_group_view(request):
-    pass
+@login_required
+def join_group_view(request, pk):
+    """A view to join the group."""
+
+    group = get_object_or_404(Group, pk=pk)
+    if request.user in group.users.all():
+        return redirect(reverse('my_groups_view'))
+
+    if request.method == 'POST':
+        group.users.add(request.user)
+        return redirect(reverse('my_groups_view'))
+
+    context = {
+        'group': group,
+    }
+
+    return render(request, 'platformapp/join_group_view.html', context)
 
 
 def search_groups_view(request):
