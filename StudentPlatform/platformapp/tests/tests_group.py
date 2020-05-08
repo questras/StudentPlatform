@@ -133,3 +133,60 @@ class JoinGroupViewTests(TestCase):
 
         response = self.client.post(join_url)
         self.assertRedirects(response, reverse('my_groups_view'))
+
+
+class MyGroupsViewTests(TestCase):
+    """Tests for my_groups_view."""
+
+    def create_user_and_authenticate(self, name, password):
+        """Create test user and authenticate for testing purposes."""
+
+        self.user = User.objects.create_user(username=name, password=password)
+        self.client.login(username=name, password=password)
+
+    def create_group(self, name, description, user):
+        """Create group for testing purposes"""
+
+        group = Group.objects.create(
+            name=name,
+            description=description,
+            creator=user,
+        )
+        group.save()
+        group.users.add(user)
+        group.save()
+
+        return group
+
+    def test_not_logged_user_cannot_access(self):
+        """Test if not logged user cannot access the view."""
+
+        some_user = User.objects.create_user(username='test', password='test')
+        group = self.create_group('test', 'test', some_user)
+
+        groups_url = reverse('my_groups_view')
+        login_url = reverse('login_view')
+        response = self.client.get(groups_url)
+        self.assertRedirects(response, f'{login_url}?next={groups_url}')
+
+    def test_logged_user_can_access(self):
+        """Test if logged user can access the view."""
+
+        self.create_user_and_authenticate('test', 'test')
+
+        response = self.client.get(reverse('my_groups_view'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_logged_user_see_only_joined_groups(self):
+        """Test if logged user see only joined groups."""
+
+        self.create_user_and_authenticate('test', 'test')
+        seen_group = self.create_group('seen', 'seen', self.user)
+        some_user = User.objects.create_user(username='some', password='some')
+        not_seen_group = self.create_group('not_seen', 'not_seen', some_user)
+
+        response = self.client.get(reverse('my_groups_view'))
+        seen_groups = response.context['groups']
+        self.assertEqual(len(seen_groups), 1)
+        self.assertIn(seen_group, seen_groups)
+        self.assertNotIn(not_seen_group, seen_groups)

@@ -50,8 +50,14 @@ def group_view(request, pk):
     pass
 
 
+@login_required
 def my_groups_view(request):
-    return render(request, 'platformapp/groups_view.html', {})
+    groups = request.user.joined_groups.all()
+    context = {
+        'groups': groups,
+    }
+
+    return render(request, 'platformapp/my_groups_view.html', context)
 
 
 @login_required
