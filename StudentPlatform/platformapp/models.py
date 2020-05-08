@@ -27,7 +27,7 @@ class Group(models.Model):
     users = models.ManyToManyField(User, related_name='joined_groups')
 
     def __str__(self):
-        return '{} created by {}.'.format(self.name, self.creator.username)
+        return f'{self.pk}. {self.name} created by {self.creator.username}.'
 
 
 class Tab(models.Model):
