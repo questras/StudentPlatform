@@ -50,6 +50,7 @@ class CreateGroupViewTests(TestCase):
         self.assertEqual(groups[0].name, 'name')
         self.assertEqual(groups[0].description, 'description')
         self.assertEqual(groups[0].creator, self.user)
+        self.assertEqual(len(groups[0].users.all()), 1)
 
     def test_cannot_create_group_with_empty_field(self):
         """Test if cannot create group with one or more empty fields"""

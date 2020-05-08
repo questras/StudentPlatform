@@ -24,6 +24,8 @@ class CreateGroupView(LoginRequiredMixin, CreateView):
         group = form.save(commit=False)
         group.creator = self.request.user
         group.save()
+        group.users.add(self.request.user)
+        group.save()
 
         return super().form_valid(form)
 
