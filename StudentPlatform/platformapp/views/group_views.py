@@ -83,5 +83,20 @@ def search_groups_view(request):
     pass
 
 
+@login_required
 def leave_group_view(request, pk):
-    pass
+    """A view to leave the group."""
+
+    group = get_object_or_404(Group, pk=pk)
+    if request.user not in group.users.all():
+        return redirect(reverse('my_groups_view'))
+
+    if request.method == 'POST':
+        group.users.remove(request.user)
+        return redirect(reverse('my_groups_view'))
+
+    context = {
+        'group': group,
+    }
+
+    return render(request, 'platformapp/leave_group_view.html', context)

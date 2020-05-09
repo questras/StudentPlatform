@@ -190,3 +190,73 @@ class MyGroupsViewTests(TestCase):
         self.assertEqual(len(seen_groups), 1)
         self.assertIn(seen_group, seen_groups)
         self.assertNotIn(not_seen_group, seen_groups)
+
+
+class LeaveGroupViewTests(TestCase):
+    """Tests for leave_group_view"""
+
+    def create_user_and_authenticate(self, name, password):
+        """Create test user and authenticate for testing purposes."""
+
+        self.user = User.objects.create_user(username=name, password=password)
+        self.client.login(username=name, password=password)
+
+    def create_group(self, name, description, user):
+        """Create group for testing purposes"""
+
+        group = Group.objects.create(
+            name=name,
+            description=description,
+            creator=user,
+        )
+        group.save()
+        group.users.add(user)
+        group.save()
+
+        return group
+
+    def test_not_logged_user_cannot_leave(self):
+        """Test if not logged user cannot leave any group."""
+
+        some_user = User.objects.create_user(username='test', password='test')
+        group = self.create_group('test', 'test', some_user)
+
+        leave_url = reverse('leave_group_view', args=(group.pk,))
+        login_url = reverse('login_view')
+
+        response = self.client.get(leave_url)
+        self.assertRedirects(response, expected_url=f'{login_url}?next={leave_url}')
+
+        response = self.client.post(leave_url)
+        self.assertRedirects(response, expected_url=f'{login_url}?next={leave_url}')
+
+    def test_logged_user_in_group_can_leave(self):
+        """Test if logged user in group can leave it."""
+
+        self.create_user_and_authenticate('test', 'test')
+        group = self.create_group('test', 'test', self.user)
+        leave_url = reverse('leave_group_view', args=(group.pk,))
+
+        response = self.client.get(leave_url)
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post(leave_url)
+        self.assertRedirects(response, reverse('my_groups_view'))
+        self.assertNotIn(self.user, group.users.all())
+        self.assertNotIn(group, self.user.joined_groups.all())
+
+    def test_logged_user_not_in_group_is_redirected(self):
+        """Test if logged user not in group is redirected."""
+
+        self.create_user_and_authenticate('test', 'test')
+        some_user = User.objects.create_user(username='some', password='some')
+        group = self.create_group('test', 'test', some_user)
+        leave_url = reverse('leave_group_view', args=(group.pk,))
+
+        response = self.client.get(leave_url)
+        self.assertRedirects(response, reverse('my_groups_view'))
+
+        response = self.client.post(leave_url)
+        self.assertRedirects(response, reverse('my_groups_view'))
+        self.assertNotIn(self.user, group.users.all())
+        self.assertNotIn(group, self.user.joined_groups.all())
