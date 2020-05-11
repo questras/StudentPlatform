@@ -7,6 +7,21 @@ from ..models import Group
 User = get_user_model()
 
 
+def create_group(name, description, user):
+    """Create group for testing purposes"""
+
+    group = Group.objects.create(
+        name=name,
+        description=description,
+        creator=user,
+    )
+    group.save()
+    group.users.add(user)
+    group.save()
+
+    return group
+
+
 class CreateGroupViewTests(TestCase):
     """Tests for CreateGroupView."""
 
@@ -75,25 +90,11 @@ class JoinGroupViewTests(TestCase):
         self.user = User.objects.create_user(username=name, password=password)
         self.client.login(username=name, password=password)
 
-    def create_group(self, name, description, user):
-        """Create group for testing purposes"""
-
-        group = Group.objects.create(
-            name=name,
-            description=description,
-            creator=user,
-        )
-        group.save()
-        group.users.add(user)
-        group.save()
-
-        return group
-
     def test_not_logged_user_cannot_access(self):
         """Test if not logged user cannot join group."""
 
         some_user = User.objects.create_user(username='test', password='test')
-        group = self.create_group('test', 'test', some_user)
+        group = create_group('test', 'test', some_user)
 
         join_url = reverse('join_group_view', args=(group.pk,))
         login_url = reverse('login_view')
@@ -109,7 +110,7 @@ class JoinGroupViewTests(TestCase):
 
         self.create_user_and_authenticate('test', 'test')
         some_user = User.objects.create_user(username='some', password='some')
-        group = self.create_group('test', 'test', some_user)
+        group = create_group('test', 'test', some_user)
         join_url = reverse('join_group_view', args=(group.pk,))
 
         response = self.client.get(join_url)
@@ -125,7 +126,7 @@ class JoinGroupViewTests(TestCase):
         the group is redirected."""
 
         self.create_user_and_authenticate('test', 'test')
-        group = self.create_group('test', 'test', self.user)
+        group = create_group('test', 'test', self.user)
         join_url = reverse('join_group_view', args=(group.pk,))
 
         response = self.client.get(join_url)
@@ -144,25 +145,11 @@ class MyGroupsViewTests(TestCase):
         self.user = User.objects.create_user(username=name, password=password)
         self.client.login(username=name, password=password)
 
-    def create_group(self, name, description, user):
-        """Create group for testing purposes"""
-
-        group = Group.objects.create(
-            name=name,
-            description=description,
-            creator=user,
-        )
-        group.save()
-        group.users.add(user)
-        group.save()
-
-        return group
-
     def test_not_logged_user_cannot_access(self):
         """Test if not logged user cannot access the view."""
 
         some_user = User.objects.create_user(username='test', password='test')
-        group = self.create_group('test', 'test', some_user)
+        group = create_group('test', 'test', some_user)
 
         groups_url = reverse('my_groups_view')
         login_url = reverse('login_view')
@@ -181,9 +168,9 @@ class MyGroupsViewTests(TestCase):
         """Test if logged user see only joined groups."""
 
         self.create_user_and_authenticate('test', 'test')
-        seen_group = self.create_group('seen', 'seen', self.user)
+        seen_group = create_group('seen', 'seen', self.user)
         some_user = User.objects.create_user(username='some', password='some')
-        not_seen_group = self.create_group('not_seen', 'not_seen', some_user)
+        not_seen_group = create_group('not_seen', 'not_seen', some_user)
 
         response = self.client.get(reverse('my_groups_view'))
         seen_groups = response.context['groups']
@@ -201,25 +188,11 @@ class LeaveGroupViewTests(TestCase):
         self.user = User.objects.create_user(username=name, password=password)
         self.client.login(username=name, password=password)
 
-    def create_group(self, name, description, user):
-        """Create group for testing purposes"""
-
-        group = Group.objects.create(
-            name=name,
-            description=description,
-            creator=user,
-        )
-        group.save()
-        group.users.add(user)
-        group.save()
-
-        return group
-
     def test_not_logged_user_cannot_leave(self):
         """Test if not logged user cannot leave any group."""
 
         some_user = User.objects.create_user(username='test', password='test')
-        group = self.create_group('test', 'test', some_user)
+        group = create_group('test', 'test', some_user)
 
         leave_url = reverse('leave_group_view', args=(group.pk,))
         login_url = reverse('login_view')
@@ -234,7 +207,7 @@ class LeaveGroupViewTests(TestCase):
         """Test if logged user in group can leave it."""
 
         self.create_user_and_authenticate('test', 'test')
-        group = self.create_group('test', 'test', self.user)
+        group = create_group('test', 'test', self.user)
         leave_url = reverse('leave_group_view', args=(group.pk,))
 
         response = self.client.get(leave_url)
@@ -250,7 +223,7 @@ class LeaveGroupViewTests(TestCase):
 
         self.create_user_and_authenticate('test', 'test')
         some_user = User.objects.create_user(username='some', password='some')
-        group = self.create_group('test', 'test', some_user)
+        group = create_group('test', 'test', some_user)
         leave_url = reverse('leave_group_view', args=(group.pk,))
 
         response = self.client.get(leave_url)
