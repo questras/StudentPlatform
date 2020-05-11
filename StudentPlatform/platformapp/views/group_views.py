@@ -47,7 +47,7 @@ class DeleteGroupView(DeleteView):
 
 
 def group_view(request, pk):
-    pass
+    return render(request, 'platformapp/index_view.html', {})
 
 
 @login_required
