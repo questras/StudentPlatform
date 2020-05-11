@@ -60,7 +60,7 @@ class Element(models.Model):
     name = models.CharField(max_length=45)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
-    image = models.ImageField(upload_to='images/')
+    image = models.ImageField(upload_to='images/', null=True, blank=True)
     tab = models.ForeignKey(Tab, on_delete=models.CASCADE)
 
     def __str__(self):
