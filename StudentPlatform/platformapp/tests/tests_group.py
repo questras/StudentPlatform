@@ -189,6 +189,84 @@ class UpdateGroupViewTests(TestCase):
             self.assertEqual(group.description, 'test')
 
 
+class DeleteGroupViewTests(TestCase):
+    """Tests for DeleteGroupView."""
+
+    def create_user_and_authenticate(self, name, password):
+        """Create test user and authenticate for testing purposes."""
+
+        self.user = User.objects.create_user(username=name, password=password)
+        self.client.login(username=name, password=password)
+
+    def test_not_logged_cannot_delete(self):
+        """Test if not logged user cannot delete a group."""
+
+        some_user = User.objects.create_user(username='test', password='test')
+        group = create_group('test', 'test', some_user)
+
+        delete_url = reverse('delete_group_view', args=(group.pk,))
+        login_url = reverse('login_view')
+
+        response = self.client.get(delete_url)
+        self.assertRedirects(response, expected_url=f'{login_url}?next={delete_url}')
+
+        response = self.client.post(delete_url)
+        self.assertRedirects(response, expected_url=f'{login_url}?next={delete_url}')
+        self.assertEqual(len(Group.objects.all()), 1)
+
+    def test_user_not_in_group_cannot_delete(self):
+        """Test if user who is not in the group cannot delete and is
+        redirected to my_groups_view."""
+
+        some_user = User.objects.create_user(username='some', password='some')
+        group = create_group('test', 'test', some_user)
+        self.create_user_and_authenticate('test', 'test')
+
+        delete_url = reverse('delete_group_view', args=(group.pk,))
+        groups_url = reverse('my_groups_view')
+
+        response = self.client.get(delete_url)
+        self.assertRedirects(response, expected_url=groups_url)
+
+        response = self.client.post(delete_url)
+        self.assertRedirects(response, expected_url=groups_url)
+        self.assertEqual(len(Group.objects.all()), 1)
+
+    def test_not_creator_cannot_delete(self):
+        """Test if user who is not a creator of group cannot delete
+        and is redirected to my_groups_view."""
+
+        some_user = User.objects.create_user(username='some', password='some')
+        group = create_group('test', 'test', some_user)
+        self.create_user_and_authenticate('test', 'test')
+        group.users.add(self.user)
+
+        delete_url = reverse('delete_group_view', args=(group.pk,))
+        groups_url = reverse('my_groups_view')
+
+        response = self.client.get(delete_url)
+        self.assertRedirects(response, expected_url=groups_url)
+
+        response = self.client.post(delete_url)
+        self.assertRedirects(response, expected_url=groups_url)
+        self.assertEqual(len(Group.objects.all()), 1)
+
+    def test_creator_in_group_can_delete(self):
+        """Test if creator of group who is in it can delete."""
+
+        self.create_user_and_authenticate('test', 'test')
+        group = create_group('test', 'test', self.user)
+        delete_url = reverse('delete_group_view', args=(group.pk,))
+        groups_url = reverse('my_groups_view')
+
+        response = self.client.get(delete_url)
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post(delete_url)
+        self.assertRedirects(response, expected_url=groups_url)
+        self.assertEqual(len(Group.objects.all()), 0)
+
+
 class JoinGroupViewTests(TestCase):
     """Tests for join_group_view"""
 

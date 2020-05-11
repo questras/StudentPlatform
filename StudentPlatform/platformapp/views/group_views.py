@@ -66,8 +66,38 @@ def update_group_view(request, pk):
     return render(request, 'platformapp/update_group_view.html', context)
 
 
-class DeleteGroupView(DeleteView):
-    pass
+class DeleteGroupView(LoginRequiredMixin, DeleteView):
+    """A view for deleting existing groups."""
+
+    login_url = reverse_lazy('login_view')
+    redirect_field_name = 'next'
+
+    model = Group
+    success_url = reverse_lazy('my_groups_view')
+    template_name = 'platformapp/delete_group_view.html'
+
+    def get(self, request, *args, **kwargs):
+        """Redirect if request user is not in group or
+        is not its creator."""
+
+        group = self.get_object()
+        user = request.user
+        if user.id != group.creator.id or user not in group.users.all():
+            return redirect('my_groups_view')
+
+        return super().get(request, args, kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        """Delete only if request user is its creator and
+        is in the group."""
+
+        group = self.get_object()
+        user = request.user
+
+        if user.id == group.creator.id and user in group.users.all():
+            group.delete()
+
+        return redirect(reverse('my_groups_view'))
 
 
 def group_view(request, pk):
