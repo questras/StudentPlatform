@@ -15,7 +15,7 @@ urlpatterns = [
     path('auth/login/', LoginView.as_view(), name='login_view'),
     path('auth/logout/', logout_view, name='logout_view'),
     # Group views:
-    path('group/<int:pk>/', group_view, name='main_group_view'),
+    path('group/<int:pk>/', group_view, name='group_view'),
     path('group/<int:pk>/update/', UpdateView.as_view(), name='update_group_view'),
     path('group/<int:pk>/delete/', DeleteView.as_view(), name='delete_group_view'),
     path('group/<int:pk>/leave/', leave_group_view, name='leave_group_view'),
