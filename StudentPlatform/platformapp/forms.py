@@ -14,6 +14,14 @@ class CreateGroupForm(forms.ModelForm):
         fields = ('name', 'description')
 
 
+class UpdateGroupForm(forms.ModelForm):
+    """Form for updating existing groups."""
+
+    class Meta:
+        model = Group
+        fields = ('name', 'description')
+
+
 class CreateTabForm(forms.ModelForm):
     """Form for creating new tabs"""
 

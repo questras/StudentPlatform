@@ -81,6 +81,114 @@ class CreateGroupViewTests(TestCase):
         self.assertEqual(response.status_code, 400)
 
 
+class UpdateGroupViewTests(TestCase):
+    """Tests for update_group_view."""
+
+    def create_user_and_authenticate(self, name, password):
+        """Create test user and authenticate for testing purposes."""
+
+        self.user = User.objects.create_user(username=name, password=password)
+        self.client.login(username=name, password=password)
+
+    def test_not_logged_cannot_update(self):
+        """Test if not logged user cannot update a group."""
+
+        some_user = User.objects.create_user(username='test', password='test')
+        group = create_group('test', 'test', some_user)
+
+        update_url = reverse('update_group_view', args=(group.pk,))
+        login_url = reverse('login_view')
+
+        response = self.client.get(update_url)
+        self.assertRedirects(response, expected_url=f'{login_url}?next={update_url}')
+
+        data = {
+            'name': 'new',
+            'description': 'new',
+        }
+        response = self.client.post(update_url, data)
+        self.assertRedirects(response, expected_url=f'{login_url}?next={update_url}')
+
+    def test_user_not_in_group_cannot_update(self):
+        """Test if user who is not in the group cannot update and is
+        redirected to my_groups_view."""
+
+        some_user = User.objects.create_user(username='some', password='some')
+        group = create_group('test', 'test', some_user)
+        self.create_user_and_authenticate('test', 'test')
+
+        update_url = reverse('update_group_view', args=(group.pk,))
+        groups_url = reverse('my_groups_view')
+
+        response = self.client.get(update_url)
+        self.assertRedirects(response, expected_url=groups_url)
+
+        data = {
+            'name': 'new',
+            'description': 'new',
+        }
+        response = self.client.post(update_url, data)
+        self.assertRedirects(response, expected_url=groups_url)
+
+    def test_not_creator_cannot_update(self):
+        """Test if user who is not a creator of group cannot update
+        and is redirected to my_groups_view."""
+
+        some_user = User.objects.create_user(username='some', password='some')
+        group = create_group('test', 'test', some_user)
+        self.create_user_and_authenticate('test', 'test')
+        group.users.add(self.user)
+
+        update_url = reverse('update_group_view', args=(group.pk,))
+        groups_url = reverse('my_groups_view')
+
+        response = self.client.get(update_url)
+        self.assertRedirects(response, expected_url=groups_url)
+
+        data = {
+            'name': 'new',
+            'description': 'new',
+        }
+        response = self.client.post(update_url, data)
+        self.assertRedirects(response, expected_url=groups_url)
+
+    def test_creator_in_group_can_update(self):
+        """Test if creator of group who is in it can update."""
+
+        self.create_user_and_authenticate('test', 'test')
+        group = create_group('test', 'test', self.user)
+        update_url = reverse('update_group_view', args=(group.pk,))
+        group_url = reverse('group_view', args=(group.pk,))
+
+        response = self.client.get(update_url)
+        self.assertEqual(response.status_code, 200)
+
+        data = {
+            'name': 'new',
+            'description': 'new',
+        }
+        response = self.client.post(update_url, data)
+        self.assertRedirects(response, expected_url=group_url)
+
+        updated_group = Group.objects.get(pk=group.pk)
+        self.assertEqual(updated_group.name, 'new')
+        self.assertEqual(updated_group.description, 'new')
+
+    def test_cannot_update_with_empty_field(self):
+        """Test if cannot update group with one or more empty fields"""
+
+        self.create_user_and_authenticate('test', 'test')
+        group = create_group('test', 'test', self.user)
+        update_url = reverse('update_group_view', args=(group.pk,))
+
+        data_list = [{'name': 'new'}, {'description': 'new'}]
+        for data in data_list:
+            self.client.post(update_url, data)
+            # Group's fields are unchanged.
+            self.assertEqual(group.name, 'test')
+            self.assertEqual(group.description, 'test')
+
+
 class JoinGroupViewTests(TestCase):
     """Tests for join_group_view"""
 

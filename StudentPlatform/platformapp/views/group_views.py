@@ -5,7 +5,7 @@ from django.shortcuts import reverse, render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 
 from ..models import Group
-from ..forms import CreateGroupForm
+from ..forms import CreateGroupForm, UpdateGroupForm
 
 
 class CreateGroupView(LoginRequiredMixin, CreateView):
@@ -38,8 +38,32 @@ class CreateGroupView(LoginRequiredMixin, CreateView):
         return response
 
 
-class UpdateGroupView(UpdateView):
-    pass
+@login_required
+def update_group_view(request, pk):
+    """A view for updating existing groups."""
+
+    group = get_object_or_404(Group, pk=pk)
+    user = request.user
+
+    # Only creator who is in group can update the group.
+    if user.id != group.creator.id or user not in group.users.all():
+        return redirect(reverse('my_groups_view'))
+
+    if request.method == 'POST':
+        form = UpdateGroupForm(request.POST)
+        if form.is_valid():
+            group.name = form.cleaned_data['name']
+            group.description = form.cleaned_data['description']
+            group.save()
+
+            return redirect(reverse('group_view', args=(group.pk,)))
+
+    form = UpdateGroupForm(instance=group)
+    context = {
+        'form': form,
+    }
+
+    return render(request, 'platformapp/update_group_view.html', context)
 
 
 class DeleteGroupView(DeleteView):
