@@ -18,6 +18,17 @@
                     <td>{{ group.description }}</td>
                     <td>{{ group.creator.username }}</td>
                     <td><a href="{% url 'join_group_view' group.pk %}">{% url 'join_group_view' group.pk %}</a></td>
+                    <td>
+                        {% if request.user.id == group.creator.id %}
+                            <a href="{% url 'delete_group_view' group.pk %}">
+                                <button class="btn btn-danger">Delete</button>
+                            </a>
+                        {% else %}
+                            <a href="{% url 'leave_group_view' group.pk %}">
+                                <button class="btn btn-warning">Leave</button>
+                            </a>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>
