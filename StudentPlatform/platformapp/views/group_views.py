@@ -137,8 +137,6 @@ def join_group_view(request, pk):
     """A view to join the group."""
 
     group = get_object_or_404(Group, pk=pk)
-    tabs = Tab.objects.filter(group_id=group.id)
-
 
     if request.user in group.users.all():
         return redirect(reverse('my_groups_view'))
