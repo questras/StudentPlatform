@@ -2,61 +2,14 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.shortcuts import reverse
 
-from ..models import Group, Tab, Element
+from ..models import Group
+from . import utils_for_testing as utils
 
 User = get_user_model()
 
 
-def create_group(name, description, user):
-    """Create group for testing purposes"""
-
-    group = Group.objects.create(
-        name=name,
-        description=description,
-        creator=user,
-    )
-    group.save()
-    group.users.add(user)
-    group.save()
-
-    return group
-
-
-def create_tab(name, user, group):
-    """Create Tab for testing purposes"""
-
-    tab = Tab.objects.create(
-        name=name,
-        creator=user,
-        group=group,
-    )
-    tab.save()
-
-    return tab
-
-
-def create_element(name, text, user, tab):
-    """Create element for testing purposes"""
-
-    element = Element.objects.create(
-        name=name,
-        text=text,
-        creator=user,
-        tab=tab,
-    )
-    element.save()
-
-    return element
-
-
 class CreateGroupViewTests(TestCase):
     """Tests for CreateGroupView."""
-
-    def create_user_and_authenticate(self, name, password):
-        """Create test user and authenticate for testing purposes."""
-
-        self.user = User.objects.create_user(username=name, password=password)
-        self.client.login(username=name, password=password)
 
     def test_not_logged_cannot_create_group(self):
         """Test if not logged user cannot create group."""
@@ -76,7 +29,7 @@ class CreateGroupViewTests(TestCase):
     def test_logged_can_create_group(self):
         """Test if logged user can create group."""
 
-        self.create_user_and_authenticate('test', 'test')
+        utils.create_user_and_authenticate(self)
 
         response = self.client.get(reverse('create_group_view'))
         self.assertEqual(response.status_code, 200)
@@ -97,7 +50,7 @@ class CreateGroupViewTests(TestCase):
     def test_cannot_create_group_with_empty_field(self):
         """Test if cannot create group with one or more empty fields"""
 
-        self.create_user_and_authenticate('test', 'test')
+        utils.create_user_and_authenticate(self)
 
         data = {'name': 'name'}
         response = self.client.post(reverse('create_group_view'), data)
@@ -111,17 +64,11 @@ class CreateGroupViewTests(TestCase):
 class UpdateGroupViewTests(TestCase):
     """Tests for update_group_view."""
 
-    def create_user_and_authenticate(self, name, password):
-        """Create test user and authenticate for testing purposes."""
-
-        self.user = User.objects.create_user(username=name, password=password)
-        self.client.login(username=name, password=password)
-
     def test_not_logged_cannot_update(self):
         """Test if not logged user cannot update a group."""
 
         some_user = User.objects.create_user(username='test', password='test')
-        group = create_group('test', 'test', some_user)
+        group = utils.create_group('test', 'test', some_user)
 
         update_url = reverse('update_group_view', args=(group.pk,))
         login_url = reverse('login_view')
@@ -140,9 +87,8 @@ class UpdateGroupViewTests(TestCase):
         """Test if user who is not in the group cannot update and is
         redirected to my_groups_view."""
 
-        some_user = User.objects.create_user(username='some', password='some')
-        group = create_group('test', 'test', some_user)
-        self.create_user_and_authenticate('test', 'test')
+        utils.create_two_users_authenticate_one(self)
+        group = utils.create_group('test', 'test', self.not_logged_user)
 
         update_url = reverse('update_group_view', args=(group.pk,))
         groups_url = reverse('my_groups_view')
@@ -161,10 +107,9 @@ class UpdateGroupViewTests(TestCase):
         """Test if user who is not a creator of group cannot update
         and is redirected to my_groups_view."""
 
-        some_user = User.objects.create_user(username='some', password='some')
-        group = create_group('test', 'test', some_user)
-        self.create_user_and_authenticate('test', 'test')
-        group.users.add(self.user)
+        utils.create_two_users_authenticate_one(self)
+        group = utils.create_group('test', 'test', self.not_logged_user)
+        group.users.add(self.logged_user)
 
         update_url = reverse('update_group_view', args=(group.pk,))
         groups_url = reverse('my_groups_view')
@@ -182,8 +127,8 @@ class UpdateGroupViewTests(TestCase):
     def test_creator_in_group_can_update(self):
         """Test if creator of group who is in it can update."""
 
-        self.create_user_and_authenticate('test', 'test')
-        group = create_group('test', 'test', self.user)
+        utils.create_user_and_authenticate(self)
+        group = utils.create_group('test', 'test', self.user)
         update_url = reverse('update_group_view', args=(group.pk,))
         group_url = reverse('group_view', args=(group.pk,))
 
@@ -204,8 +149,8 @@ class UpdateGroupViewTests(TestCase):
     def test_cannot_update_with_empty_field(self):
         """Test if cannot update group with one or more empty fields"""
 
-        self.create_user_and_authenticate('test', 'test')
-        group = create_group('test', 'test', self.user)
+        utils.create_user_and_authenticate(self)
+        group = utils.create_group('test', 'test', self.user)
         update_url = reverse('update_group_view', args=(group.pk,))
 
         data_list = [{'name': 'new'}, {'description': 'new'}]
@@ -219,17 +164,11 @@ class UpdateGroupViewTests(TestCase):
 class DeleteGroupViewTests(TestCase):
     """Tests for DeleteGroupView."""
 
-    def create_user_and_authenticate(self, name, password):
-        """Create test user and authenticate for testing purposes."""
-
-        self.user = User.objects.create_user(username=name, password=password)
-        self.client.login(username=name, password=password)
-
     def test_not_logged_cannot_delete(self):
         """Test if not logged user cannot delete a group."""
 
-        some_user = User.objects.create_user(username='test', password='test')
-        group = create_group('test', 'test', some_user)
+        not_logged_user = utils.create_user('test', 'test')
+        group = utils.create_group('test', 'test', not_logged_user)
 
         delete_url = reverse('delete_group_view', args=(group.pk,))
         login_url = reverse('login_view')
@@ -245,9 +184,8 @@ class DeleteGroupViewTests(TestCase):
         """Test if user who is not in the group cannot delete and is
         redirected to my_groups_view."""
 
-        some_user = User.objects.create_user(username='some', password='some')
-        group = create_group('test', 'test', some_user)
-        self.create_user_and_authenticate('test', 'test')
+        utils.create_two_users_authenticate_one(self)
+        group = utils.create_group('test', 'test', self.not_logged_user)
 
         delete_url = reverse('delete_group_view', args=(group.pk,))
         groups_url = reverse('my_groups_view')
@@ -263,10 +201,9 @@ class DeleteGroupViewTests(TestCase):
         """Test if user who is not a creator of group cannot delete
         and is redirected to my_groups_view."""
 
-        some_user = User.objects.create_user(username='some', password='some')
-        group = create_group('test', 'test', some_user)
-        self.create_user_and_authenticate('test', 'test')
-        group.users.add(self.user)
+        utils.create_two_users_authenticate_one(self)
+        group = utils.create_group('test', 'test', self.not_logged_user)
+        group.users.add(self.logged_user)
 
         delete_url = reverse('delete_group_view', args=(group.pk,))
         groups_url = reverse('my_groups_view')
@@ -281,8 +218,8 @@ class DeleteGroupViewTests(TestCase):
     def test_creator_in_group_can_delete(self):
         """Test if creator of group who is in it can delete."""
 
-        self.create_user_and_authenticate('test', 'test')
-        group = create_group('test', 'test', self.user)
+        utils.create_user_and_authenticate(self)
+        group = utils.create_group('test', 'test', self.user)
         delete_url = reverse('delete_group_view', args=(group.pk,))
         groups_url = reverse('my_groups_view')
 
@@ -297,17 +234,11 @@ class DeleteGroupViewTests(TestCase):
 class GroupViewTests(TestCase):
     """Tests for group_view."""
 
-    def create_user_and_authenticate(self, name, password):
-        """Create test user and authenticate for testing purposes."""
-
-        self.user = User.objects.create_user(username=name, password=password)
-        self.client.login(username=name, password=password)
-
     def test_not_logged_user_cannot_access(self):
         """Test if not logged user cannot access the group's view."""
 
-        some_user = User.objects.create_user(username='some', password='some')
-        group = create_group('test', 'test', some_user)
+        not_logged_user = utils.create_user('test', 'test')
+        group = utils.create_group('test', 'test', not_logged_user)
         login_url = reverse('login_view')
         group_url = reverse('group_view', args=(group.pk,))
 
@@ -318,9 +249,8 @@ class GroupViewTests(TestCase):
         """Test if user not in the group cannot access
         the group's view."""
 
-        some_user = User.objects.create_user(username='some', password='some')
-        group = create_group('test', 'test', some_user)
-        self.create_user_and_authenticate('test', 'test')
+        utils.create_two_users_authenticate_one(self)
+        group = utils.create_group('test', 'test', self.not_logged_user)
 
         groups_url = reverse('my_groups_view')
         group_url = reverse('group_view', args=(group.pk,))
@@ -331,10 +261,9 @@ class GroupViewTests(TestCase):
     def test_user_in_group_can_access(self):
         """Test if user in the group can access the group's view."""
 
-        some_user = User.objects.create_user(username='some', password='some')
-        group = create_group('test', 'test', some_user)
-        self.create_user_and_authenticate('test', 'test')
-        group.users.add(self.user)
+        utils.create_two_users_authenticate_one(self)
+        group = utils.create_group('test', 'test', self.not_logged_user)
+        group.users.add(self.logged_user)
 
         group_url = reverse('group_view', args=(group.pk,))
 
@@ -345,15 +274,15 @@ class GroupViewTests(TestCase):
         """Test if view contains all tabs in the group
         and all elements in tabs."""
 
-        self.create_user_and_authenticate('test', 'test')
-        group1 = create_group('test1', 'test1', self.user)
-        group2 = create_group('test2', 'test2', self.user)
-        tab_in_group1 = create_tab('test1', self.user, group1)
-        tab_in_group2 = create_tab('test2', self.user, group2)
-        element_in_group1 = create_element(
+        utils.create_user_and_authenticate(self)
+        group1 = utils.create_group('test1', 'test1', self.user)
+        group2 = utils.create_group('test2', 'test2', self.user)
+        tab_in_group1 = utils.create_tab('test1', self.user, group1)
+        tab_in_group2 = utils.create_tab('test2', self.user, group2)
+        element_in_group1 = utils.create_element(
             'test1', 'test1', self.user, tab_in_group1
         )
-        element_in_group2 = create_element(
+        element_in_group2 = utils.create_element(
             'test2', 'test2', self.user, tab_in_group2
         )
 
@@ -374,17 +303,11 @@ class GroupViewTests(TestCase):
 class JoinGroupViewTests(TestCase):
     """Tests for join_group_view"""
 
-    def create_user_and_authenticate(self, name, password):
-        """Create test user and authenticate for testing purposes."""
-
-        self.user = User.objects.create_user(username=name, password=password)
-        self.client.login(username=name, password=password)
-
     def test_not_logged_user_cannot_access(self):
         """Test if not logged user cannot join group."""
 
-        some_user = User.objects.create_user(username='test', password='test')
-        group = create_group('test', 'test', some_user)
+        not_logged_user = utils.create_user('test', 'test')
+        group = utils.create_group('test', 'test', not_logged_user)
 
         join_url = reverse('join_group_view', args=(group.pk,))
         login_url = reverse('login_view')
@@ -398,9 +321,8 @@ class JoinGroupViewTests(TestCase):
     def test_logged_user_can_join(self):
         """Test if logged user can join group."""
 
-        self.create_user_and_authenticate('test', 'test')
-        some_user = User.objects.create_user(username='some', password='some')
-        group = create_group('test', 'test', some_user)
+        utils.create_two_users_authenticate_one(self)
+        group = utils.create_group('test', 'test', self.not_logged_user)
         join_url = reverse('join_group_view', args=(group.pk,))
 
         response = self.client.get(join_url)
@@ -408,15 +330,15 @@ class JoinGroupViewTests(TestCase):
 
         response = self.client.post(join_url)
         self.assertRedirects(response, reverse('my_groups_view'))
-        self.assertIn(self.user, group.users.all())
-        self.assertIn(group, self.user.joined_groups.all())
+        self.assertIn(self.logged_user, group.users.all())
+        self.assertIn(group, self.logged_user.joined_groups.all())
 
     def test_logged_user_already_joined_is_redirected(self):
         """Test if logged user who already joined
         the group is redirected."""
 
-        self.create_user_and_authenticate('test', 'test')
-        group = create_group('test', 'test', self.user)
+        utils.create_user_and_authenticate(self)
+        group = utils.create_group('test', 'test', self.user)
         join_url = reverse('join_group_view', args=(group.pk,))
 
         response = self.client.get(join_url)
@@ -429,17 +351,11 @@ class JoinGroupViewTests(TestCase):
 class MyGroupsViewTests(TestCase):
     """Tests for my_groups_view."""
 
-    def create_user_and_authenticate(self, name, password):
-        """Create test user and authenticate for testing purposes."""
-
-        self.user = User.objects.create_user(username=name, password=password)
-        self.client.login(username=name, password=password)
-
     def test_not_logged_user_cannot_access(self):
         """Test if not logged user cannot access the view."""
 
-        some_user = User.objects.create_user(username='test', password='test')
-        group = create_group('test', 'test', some_user)
+        not_logged_user = utils.create_user('test', 'test')
+        utils.create_group('test', 'test', not_logged_user)
 
         groups_url = reverse('my_groups_view')
         login_url = reverse('login_view')
@@ -449,7 +365,7 @@ class MyGroupsViewTests(TestCase):
     def test_logged_user_can_access(self):
         """Test if logged user can access the view."""
 
-        self.create_user_and_authenticate('test', 'test')
+        utils.create_user_and_authenticate(self)
 
         response = self.client.get(reverse('my_groups_view'))
         self.assertEqual(response.status_code, 200)
@@ -457,32 +373,25 @@ class MyGroupsViewTests(TestCase):
     def test_logged_user_see_only_joined_groups(self):
         """Test if logged user see only joined groups."""
 
-        self.create_user_and_authenticate('test', 'test')
-        seen_group = create_group('seen', 'seen', self.user)
-        some_user = User.objects.create_user(username='some', password='some')
-        not_seen_group = create_group('not_seen', 'not_seen', some_user)
+        utils.create_two_users_authenticate_one(self)
+        seen_group = utils.create_group('seen', 'seen', self.logged_user)
+        unseen_group = utils.create_group('unseen', 'unseen', self.not_logged_user)
 
         response = self.client.get(reverse('my_groups_view'))
         seen_groups = response.context['groups']
         self.assertEqual(len(seen_groups), 1)
         self.assertIn(seen_group, seen_groups)
-        self.assertNotIn(not_seen_group, seen_groups)
+        self.assertNotIn(unseen_group, seen_groups)
 
 
 class LeaveGroupViewTests(TestCase):
     """Tests for leave_group_view"""
 
-    def create_user_and_authenticate(self, name, password):
-        """Create test user and authenticate for testing purposes."""
-
-        self.user = User.objects.create_user(username=name, password=password)
-        self.client.login(username=name, password=password)
-
     def test_not_logged_user_cannot_leave(self):
         """Test if not logged user cannot leave any group."""
 
-        some_user = User.objects.create_user(username='test', password='test')
-        group = create_group('test', 'test', some_user)
+        some_user = utils.create_user('test', 'test')
+        group = utils.create_group('test', 'test', some_user)
 
         leave_url = reverse('leave_group_view', args=(group.pk,))
         login_url = reverse('login_view')
@@ -496,8 +405,8 @@ class LeaveGroupViewTests(TestCase):
     def test_logged_user_in_group_can_leave(self):
         """Test if logged user in group can leave it."""
 
-        self.create_user_and_authenticate('test', 'test')
-        group = create_group('test', 'test', self.user)
+        utils.create_user_and_authenticate(self)
+        group = utils.create_group('test', 'test', self.user)
         leave_url = reverse('leave_group_view', args=(group.pk,))
 
         response = self.client.get(leave_url)
@@ -511,9 +420,8 @@ class LeaveGroupViewTests(TestCase):
     def test_logged_user_not_in_group_is_redirected(self):
         """Test if logged user not in group is redirected."""
 
-        self.create_user_and_authenticate('test', 'test')
-        some_user = User.objects.create_user(username='some', password='some')
-        group = create_group('test', 'test', some_user)
+        utils.create_two_users_authenticate_one(self)
+        group = utils.create_group('test', 'test', self.not_logged_user)
         leave_url = reverse('leave_group_view', args=(group.pk,))
 
         response = self.client.get(leave_url)
@@ -521,5 +429,5 @@ class LeaveGroupViewTests(TestCase):
 
         response = self.client.post(leave_url)
         self.assertRedirects(response, reverse('my_groups_view'))
-        self.assertNotIn(self.user, group.users.all())
-        self.assertNotIn(group, self.user.joined_groups.all())
+        self.assertNotIn(self.logged_user, group.users.all())
+        self.assertNotIn(group, self.logged_user.joined_groups.all())

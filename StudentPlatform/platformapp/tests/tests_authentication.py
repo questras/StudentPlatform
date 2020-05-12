@@ -2,23 +2,18 @@ from django.test import TestCase
 from django.shortcuts import reverse
 from django.contrib.auth import get_user_model
 
+from . import utils_for_testing as utils
+
 User = get_user_model()
 
 
 class SignUpViewTests(TestCase):
     """Tests for SignUpView."""
 
-    def create_user(self, name, password):
-        """Create test user for testing purposes."""
-
-        self.user = User.objects.create_user(username=name, password=password)
-
     def test_logged_in_cannot_sign_up(self):
         """Test if logged in user cannot sign up"""
 
-        self.create_user('test', 'test')
-        is_logged = self.client.login(username='test', password='test')
-        self.assertTrue(is_logged)
+        utils.create_user_and_authenticate(self)
 
         # Get request redirects to feed_view.
         response = self.client.get(reverse('signup_view'))
@@ -76,9 +71,7 @@ class LogoutViewTests(TestCase):
     def test_logged_user_can_logout(self):
         """Test if logged user can logout."""
 
-        self.user = User.objects.create_user(username='test', password='test')
-        is_logged = self.client.login(username='test', password='test')
-        self.assertTrue(is_logged)
+        utils.create_user_and_authenticate(self)
 
         response = self.client.get(reverse('logout_view'))
         self.assertRedirects(response, reverse('index_view'))
