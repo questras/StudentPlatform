@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Welcome to {{ group.name }}</h2>
+    <h3>Description: {{ group.description }}</h3>
+    <h4>Creator: {{ group.creator.username }}</h4>
+
+    {% if request.user.id == group.creator.id %}
+        <a href="{% url 'delete_group_view' group.id %}">
+            <button class="btn btn-danger">Delete Group</button>
+        </a>
+    {% else %}
+        <a href="{% url 'leave_group_view' group.id %}">
+            <button class="btn btn-warning">Leave Group</button>
+        </a>
+    {% endif %}
+
+    <h2>Posts:</h2>
+    <div id="groupPosts">
+        {% for tab, elements in tabs_dict.items %}
+            <div class="card">
+                <div class="card-header" id="heading{{ forloop.counter }}">
+                    <h5 class="mb-0">
+                        <button
+                                class="btn btn-link"
+                                data-toggle="collapse"
+                                data-target=".multi{{ forloop.counter }}"
+                                aria-expanded="false"
+                        >
+                            {{ tab.name }}
+                        </button>
+                    </h5>
+                </div>
+                {% for element in elements %}
+                    <div
+                            id="collapse{{ forloop.parentloop.counter }}{{ forloop.counter }}"
+                            class="collapse multi{{ forloop.parentloop.counter }}"
+                            aria-labelledby="heading{{ forloop.parentloop.counter }}"
+                            data-parent="#accordion"
+                    >
+                        <div class="card-body">
+                            <a href="{% url 'element_view' group.pk tab.pk element.pk %}">{{ element.name }}</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

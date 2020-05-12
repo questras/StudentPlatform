@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.shortcuts import reverse
 
-from ..models import Group
+from ..models import Group, Tab, Element
 
 User = get_user_model()
 
@@ -20,6 +20,33 @@ def create_group(name, description, user):
     group.save()
 
     return group
+
+
+def create_tab(name, user, group):
+    """Create Tab for testing purposes"""
+
+    tab = Tab.objects.create(
+        name=name,
+        creator=user,
+        group=group,
+    )
+    tab.save()
+
+    return tab
+
+
+def create_element(name, text, user, tab):
+    """Create element for testing purposes"""
+
+    element = Element.objects.create(
+        name=name,
+        text=text,
+        creator=user,
+        tab=tab,
+    )
+    element.save()
+
+    return element
 
 
 class CreateGroupViewTests(TestCase):
@@ -265,6 +292,83 @@ class DeleteGroupViewTests(TestCase):
         response = self.client.post(delete_url)
         self.assertRedirects(response, expected_url=groups_url)
         self.assertEqual(len(Group.objects.all()), 0)
+
+
+class GroupViewTests(TestCase):
+    """Tests for group_view."""
+
+    def create_user_and_authenticate(self, name, password):
+        """Create test user and authenticate for testing purposes."""
+
+        self.user = User.objects.create_user(username=name, password=password)
+        self.client.login(username=name, password=password)
+
+    def test_not_logged_user_cannot_access(self):
+        """Test if not logged user cannot access the group's view."""
+
+        some_user = User.objects.create_user(username='some', password='some')
+        group = create_group('test', 'test', some_user)
+        login_url = reverse('login_view')
+        group_url = reverse('group_view', args=(group.pk,))
+
+        response = self.client.get(group_url)
+        self.assertRedirects(response, expected_url=f'{login_url}?next={group_url}')
+
+    def test_user_not_in_group_cannot_access(self):
+        """Test if user not in the group cannot access
+        the group's view."""
+
+        some_user = User.objects.create_user(username='some', password='some')
+        group = create_group('test', 'test', some_user)
+        self.create_user_and_authenticate('test', 'test')
+
+        groups_url = reverse('my_groups_view')
+        group_url = reverse('group_view', args=(group.pk,))
+
+        response = self.client.get(group_url)
+        self.assertRedirects(response, expected_url=groups_url)
+
+    def test_user_in_group_can_access(self):
+        """Test if user in the group can access the group's view."""
+
+        some_user = User.objects.create_user(username='some', password='some')
+        group = create_group('test', 'test', some_user)
+        self.create_user_and_authenticate('test', 'test')
+        group.users.add(self.user)
+
+        group_url = reverse('group_view', args=(group.pk,))
+
+        response = self.client.get(group_url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_contains_all_tabs_and_elements_related_to_group(self):
+        """Test if view contains all tabs in the group
+        and all elements in tabs."""
+
+        self.create_user_and_authenticate('test', 'test')
+        group1 = create_group('test1', 'test1', self.user)
+        group2 = create_group('test2', 'test2', self.user)
+        tab_in_group1 = create_tab('test1', self.user, group1)
+        tab_in_group2 = create_tab('test2', self.user, group2)
+        element_in_group1 = create_element(
+            'test1', 'test1', self.user, tab_in_group1
+        )
+        element_in_group2 = create_element(
+            'test2', 'test2', self.user, tab_in_group2
+        )
+
+        response = self.client.get(reverse('group_view', args=(group1.pk,)))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(tab_in_group1, response.context['tabs_dict'].keys())
+        self.assertNotIn(tab_in_group2, response.context['tabs_dict'].keys())
+        self.assertIn(
+            element_in_group1,
+            response.context['tabs_dict'][tab_in_group1]
+        )
+        self.assertNotIn(
+            element_in_group2,
+            response.context['tabs_dict'][tab_in_group1]
+        )
 
 
 class JoinGroupViewTests(TestCase):

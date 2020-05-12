@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import reverse, render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 
-from ..models import Group
+from ..models import Group, Tab, Element
 from ..forms import CreateGroupForm, UpdateGroupForm
 
 
@@ -100,8 +100,26 @@ class DeleteGroupView(LoginRequiredMixin, DeleteView):
         return redirect(reverse('my_groups_view'))
 
 
+@login_required
 def group_view(request, pk):
-    return render(request, 'platformapp/index_view.html', {})
+    """Main view of group containing all tabs related to group
+    and all tabs' elements."""
+
+    group = get_object_or_404(Group, pk=pk)
+    user = request.user
+
+    if user not in group.users.all():
+        return redirect(reverse('my_groups_view'))
+
+    tabs = Tab.objects.filter(group_id=group.pk)
+    tabs_dict = {tab: Element.objects.filter(tab_id=tab.pk) for tab in tabs}
+
+    context = {
+        'group': group,
+        'tabs_dict': tabs_dict,
+    }
+
+    return render(request, 'platformapp/group_view.html', context)
 
 
 @login_required
@@ -119,6 +137,9 @@ def join_group_view(request, pk):
     """A view to join the group."""
 
     group = get_object_or_404(Group, pk=pk)
+    tabs = Tab.objects.filter(group_id=group.id)
+
+
     if request.user in group.users.all():
         return redirect(reverse('my_groups_view'))
 
