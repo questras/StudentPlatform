@@ -67,8 +67,8 @@ class UpdateGroupViewTests(TestCase):
     def test_not_logged_cannot_update(self):
         """Test if not logged user cannot update a group."""
 
-        some_user = User.objects.create_user(username='test', password='test')
-        group = utils.create_group('test', 'test', some_user)
+        not_logged_user = utils.create_user('test', 'test')
+        group = utils.create_group('test', 'test', not_logged_user)
 
         update_url = reverse('update_group_view', args=(group.pk,))
         login_url = reverse('login_view')
