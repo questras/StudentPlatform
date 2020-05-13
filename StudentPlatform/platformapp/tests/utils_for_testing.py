@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.shortcuts import reverse
 
 from ..models import Group, Tab, Element
 
@@ -71,3 +72,9 @@ def create_element(name, text, user, tab):
     element.save()
 
     return element
+
+
+def login_redirect_url(url):
+    """Return url to login view with next query set to [url]."""
+    login_url = reverse('login_view')
+    return f'{login_url}?next={url}'
