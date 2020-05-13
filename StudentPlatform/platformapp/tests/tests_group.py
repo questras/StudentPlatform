@@ -44,7 +44,7 @@ class CreateGroupViewTests(TestCase):
         self.assertEqual(len(groups), 1)
         self.assertEqual(groups[0].name, 'name')
         self.assertEqual(groups[0].description, 'description')
-        self.assertEqual(groups[0].creator, self.user)
+        self.assertEqual(groups[0].creator, self.logged_user)
         self.assertEqual(len(groups[0].users.all()), 1)
 
     def test_cannot_create_group_with_empty_field(self):
@@ -128,7 +128,7 @@ class UpdateGroupViewTests(TestCase):
         """Test if creator of group who is in it can update."""
 
         utils.create_user_and_authenticate(self)
-        group = utils.create_group('test', 'test', self.user)
+        group = utils.create_group('test', 'test', self.logged_user)
         update_url = reverse('update_group_view', args=(group.pk,))
         group_url = reverse('group_view', args=(group.pk,))
 
@@ -150,7 +150,7 @@ class UpdateGroupViewTests(TestCase):
         """Test if cannot update group with one or more empty fields"""
 
         utils.create_user_and_authenticate(self)
-        group = utils.create_group('test', 'test', self.user)
+        group = utils.create_group('test', 'test', self.logged_user)
         update_url = reverse('update_group_view', args=(group.pk,))
 
         data_list = [{'name': 'new'}, {'description': 'new'}]
@@ -219,7 +219,7 @@ class DeleteGroupViewTests(TestCase):
         """Test if creator of group who is in it can delete."""
 
         utils.create_user_and_authenticate(self)
-        group = utils.create_group('test', 'test', self.user)
+        group = utils.create_group('test', 'test', self.logged_user)
         delete_url = reverse('delete_group_view', args=(group.pk,))
         groups_url = reverse('my_groups_view')
 
@@ -275,15 +275,15 @@ class GroupViewTests(TestCase):
         and all elements in tabs."""
 
         utils.create_user_and_authenticate(self)
-        group1 = utils.create_group('test1', 'test1', self.user)
-        group2 = utils.create_group('test2', 'test2', self.user)
-        tab_in_group1 = utils.create_tab('test1', self.user, group1)
-        tab_in_group2 = utils.create_tab('test2', self.user, group2)
+        group1 = utils.create_group('test1', 'test1', self.logged_user)
+        group2 = utils.create_group('test2', 'test2', self.logged_user)
+        tab_in_group1 = utils.create_tab('test1', self.logged_user, group1)
+        tab_in_group2 = utils.create_tab('test2', self.logged_user, group2)
         element_in_group1 = utils.create_element(
-            'test1', 'test1', self.user, tab_in_group1
+            'test1', 'test1', self.logged_user, tab_in_group1
         )
         element_in_group2 = utils.create_element(
-            'test2', 'test2', self.user, tab_in_group2
+            'test2', 'test2', self.logged_user, tab_in_group2
         )
 
         response = self.client.get(reverse('group_view', args=(group1.pk,)))
@@ -338,7 +338,7 @@ class JoinGroupViewTests(TestCase):
         the group is redirected."""
 
         utils.create_user_and_authenticate(self)
-        group = utils.create_group('test', 'test', self.user)
+        group = utils.create_group('test', 'test', self.logged_user)
         join_url = reverse('join_group_view', args=(group.pk,))
 
         response = self.client.get(join_url)
@@ -390,8 +390,8 @@ class LeaveGroupViewTests(TestCase):
     def test_not_logged_user_cannot_leave(self):
         """Test if not logged user cannot leave any group."""
 
-        some_user = utils.create_user('test', 'test')
-        group = utils.create_group('test', 'test', some_user)
+        not_logged_user = utils.create_user('test', 'test')
+        group = utils.create_group('test', 'test', not_logged_user)
 
         leave_url = reverse('leave_group_view', args=(group.pk,))
         login_url = reverse('login_view')
@@ -406,7 +406,7 @@ class LeaveGroupViewTests(TestCase):
         """Test if logged user in group can leave it."""
 
         utils.create_user_and_authenticate(self)
-        group = utils.create_group('test', 'test', self.user)
+        group = utils.create_group('test', 'test', self.logged_user)
         leave_url = reverse('leave_group_view', args=(group.pk,))
 
         response = self.client.get(leave_url)
@@ -414,8 +414,8 @@ class LeaveGroupViewTests(TestCase):
 
         response = self.client.post(leave_url)
         self.assertRedirects(response, reverse('my_groups_view'))
-        self.assertNotIn(self.user, group.users.all())
-        self.assertNotIn(group, self.user.joined_groups.all())
+        self.assertNotIn(self.logged_user, group.users.all())
+        self.assertNotIn(group, self.logged_user.joined_groups.all())
 
     def test_logged_user_not_in_group_is_redirected(self):
         """Test if logged user not in group is redirected."""
