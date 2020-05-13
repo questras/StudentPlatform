@@ -18,7 +18,7 @@ def create_user_and_authenticate(test_case: TestCase):
     """Create user for testing purposes, save him as
     test_case's variable [user] and log in."""
 
-    test_case.user = create_user('test', 'test')
+    test_case.logged_user = create_user('test', 'test')
     test_case.client.login(username='test', password='test')
 
 
