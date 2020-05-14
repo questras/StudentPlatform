@@ -19,8 +19,8 @@ def create_user_and_authenticate(test_case: TestCase):
     """Create user for testing purposes, save him as
     test_case's variable [user] and log in."""
 
-    test_case.logged_user = create_user('test', 'test')
-    test_case.client.login(username='test', password='test')
+    test_case.logged_user = create_user('logged', 'logged')
+    test_case.client.login(username='logged', password='logged')
 
 
 def create_two_users_authenticate_one(test_case: TestCase):
@@ -29,7 +29,7 @@ def create_two_users_authenticate_one(test_case: TestCase):
     and authenticate [logged_user]."""
 
     test_case.logged_user = create_user('logged', 'logged')
-    test_case.not_logged_user = create_user('not_logged', 'not_logged')
+    test_case.not_logged_user = create_user('notlogged', 'notlogged')
     test_case.client.login(username='logged', password='logged')
 
 
