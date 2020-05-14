@@ -5,6 +5,7 @@ from django.shortcuts import reverse
 from ..models import Group, Tab, Element
 
 User = get_user_model()
+LOGIN_URL = reverse('login_view')
 
 
 def create_user(name, password):
@@ -76,5 +77,17 @@ def create_element(name, text, user, tab):
 
 def login_redirect_url(url):
     """Return url to login view with next query set to [url]."""
-    login_url = reverse('login_view')
-    return f'{login_url}?next={url}'
+    return f'{LOGIN_URL}?next={url}'
+
+
+def test_not_logged_cannot_access(test_case: TestCase,
+                                  url: str,
+                                  data: dict = None):
+    """Check if test case cannot access given url with
+    GET request and POST request with optional data."""
+
+    response = test_case.client.get(url)
+    test_case.assertRedirects(response, login_redirect_url(url))
+
+    response = test_case.client.post(url, data)
+    test_case.assertRedirects(response, login_redirect_url(url))
