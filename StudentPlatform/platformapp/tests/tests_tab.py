@@ -11,41 +11,29 @@ User = get_user_model()
 class CreateTabViewTests(TestCase):
     """Tests for create_tab_view."""
 
+    def setUp(self) -> None:
+        self.not_logged_user = utils.create_user('notlogged', 'notlogged')
+        self.group = utils.create_group('test', 'test', self.not_logged_user)
+        self.url = reverse('create_tab_view', args=(self.group.pk,))
+        self.data = {
+            'name': 'new',
+        }
+
     def test_not_logged_cannot_create_tab(self):
         """Test if not logged user cannot create a tab."""
 
-        not_logged_user = utils.create_user('test', 'test')
-        group = utils.create_group('test', 'test', not_logged_user)
+        utils.test_not_logged_cannot_access(self, self.url, self.data)
 
-        tab_url = reverse('create_tab_view', args=(group.pk,))
-        expected_url = utils.login_redirect_url(tab_url)
-
-        response = self.client.get(tab_url)
-        self.assertRedirects(response, expected_url=expected_url)
-
-        data = {
-            'name': 'name',
-        }
-        response = self.client.post(tab_url, data)
-        self.assertRedirects(response, expected_url=expected_url)
-        self.assertEqual(len(Tab.objects.all()), 0)
-
-    def test_user_not_in_group_cannot_create(self):
+    def test_user_not_in_group_cannot_create_tab(self):
         """Test if user not in group cannot create a tab."""
 
-        utils.create_two_users_authenticate_one(self)
-        group = utils.create_group('test', 'test', self.not_logged_user)
-
-        tab_url = reverse('create_tab_view', args=(group.pk,))
+        utils.create_user_and_authenticate(self)
         expected_url = reverse('my_groups_view')
 
-        response = self.client.get(tab_url)
+        response = self.client.get(self.url)
         self.assertRedirects(response, expected_url=expected_url)
 
-        data = {
-            'name': 'name',
-        }
-        response = self.client.post(tab_url, data)
+        response = self.client.post(self.url, self.data)
         self.assertRedirects(response, expected_url=expected_url)
         self.assertEqual(len(Tab.objects.all()), 0)
 
@@ -53,17 +41,13 @@ class CreateTabViewTests(TestCase):
         """Test if user in group can create tab."""
 
         utils.create_user_and_authenticate(self)
-        group = utils.create_group('test', 'test', self.logged_user)
-        tab_url = reverse('create_tab_view', args=(group.pk,))
-        expected_url = reverse('group_view', args=(group.pk,))
+        self.group.users.add(self.logged_user)
+        expected_url = reverse('group_view', args=(self.group.pk,))
 
-        response = self.client.get(tab_url)
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
 
-        data = {
-            'name': 'name',
-        }
-        response = self.client.post(tab_url, data)
+        response = self.client.post(self.url, self.data)
         self.assertRedirects(response, expected_url=expected_url)
         self.assertEqual(len(Tab.objects.all()), 1)
 
@@ -71,10 +55,8 @@ class CreateTabViewTests(TestCase):
         """Test if cannot create tab with empty field."""
 
         utils.create_user_and_authenticate(self)
-        group = utils.create_group('test', 'test', self.logged_user)
-        tab_url = reverse('create_tab_view', args=(group.pk,))
+        self.group.users.add(self.logged_user)
 
-        data = {}
-        response = self.client.post(tab_url, data)
+        response = self.client.post(self.url, {})
         self.assertEqual(response.status_code, 400)
         self.assertEqual(len(Tab.objects.all()), 0)
