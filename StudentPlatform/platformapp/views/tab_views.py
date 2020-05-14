@@ -40,9 +40,51 @@ def create_tab_view(request, g_pk):
     return render(request, 'platformapp/create_tab_view.html', context)
 
 
-class UpdateTabView(UpdateView):
-    pass
+@login_required
+def update_tab_view(request, g_pk, pk):
+    """A view for updating tabs."""
+
+    group = get_object_or_404(Group, pk=g_pk)
+    tab = get_object_or_404(Tab, pk=pk)
+    user = request.user
+
+    if user not in group.users.all():
+        return redirect(reverse('my_groups_view'))
+    elif user.id != tab.creator.id:
+        return redirect(reverse('group_view', args=(group.pk,)))
+
+    if request.method == 'POST':
+        form = CreateTabForm(request.POST)
+        if form.is_valid():
+            tab.name = form.cleaned_data['name']
+            tab.save()
+            return redirect(reverse('group_view', args=(group.pk,)))
+        else:
+            return HttpResponseBadRequest()
+
+    form = CreateTabForm(instance=tab)
+    context = {
+        'form': form,
+    }
+
+    return render(request, 'platformapp/update_tab_view.html', context)
 
 
-class DeleteTabView(DeleteView):
-    pass
+@login_required
+def delete_tab_view(request, g_pk, pk):
+    """A view for deleting tabs."""
+
+    group = get_object_or_404(Group, pk=g_pk)
+    tab = get_object_or_404(Tab, pk=pk)
+    user = request.user
+
+    if user not in group.users.all():
+        return redirect(reverse('my_groups_view'))
+    elif user.id != tab.creator.id:
+        return redirect(reverse('group_view', args=(group.pk,)))
+
+    if request.method == 'POST':
+        tab.delete()
+        return redirect(reverse('group_view', args=(group.pk,)))
+
+    return render(request, 'platformapp/delete_tab_view.html', {})
