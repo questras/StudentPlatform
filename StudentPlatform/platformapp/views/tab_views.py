@@ -1,6 +1,3 @@
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
 from django.http import HttpResponseBadRequest
 from django.shortcuts import reverse, redirect, get_object_or_404, render
 from django.contrib.auth.decorators import login_required
