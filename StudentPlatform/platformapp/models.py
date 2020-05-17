@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 
@@ -25,6 +24,7 @@ class Group(models.Model):
     description = models.CharField(max_length=90)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     users = models.ManyToManyField(User, related_name='joined_groups')
+    created_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'{self.pk}. {self.name} created by {self.creator.username}.'
@@ -41,6 +41,7 @@ class Tab(models.Model):
     name = models.CharField(max_length=45)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    created_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'{self.group.name} -> {self.name} ' \
@@ -62,6 +63,7 @@ class Element(models.Model):
     text = models.TextField()
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     tab = models.ForeignKey(Tab, on_delete=models.CASCADE)
+    created_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'{self.tab.group.name}->{self.tab.name}->{self.name} ' \
