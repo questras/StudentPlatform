@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import reverse
 
 from ..models import Group
+from .. import scripts
 from . import utils_for_testing as utils
 
 User = get_user_model()
@@ -60,7 +61,7 @@ class UpdateGroupViewTests(TestCase):
 
     def setUp(self) -> None:
         self.not_logged_user = utils.create_user('notlogged', 'notlogged')
-        self.group = utils.create_group('test', 'test', self.not_logged_user)
+        self.group = scripts.create_group('test', 'test', self.not_logged_user)
         self.url = reverse('update_group_view', args=(self.group.pk,))
         self.data = {
             'name': 'new',
@@ -134,7 +135,7 @@ class DeleteGroupViewTests(TestCase):
 
     def setUp(self) -> None:
         self.not_logged_user = utils.create_user('notlogged', 'notlogged')
-        self.group = utils.create_group('test', 'test', self.not_logged_user)
+        self.group = scripts.create_group('test', 'test', self.not_logged_user)
         self.url = reverse('delete_group_view', args=(self.group.pk,))
 
     def test_not_logged_cannot_delete(self):
@@ -190,7 +191,7 @@ class GroupViewTests(TestCase):
 
     def setUp(self) -> None:
         self.not_logged_user = utils.create_user('notlogged', 'notlogged')
-        self.group = utils.create_group('test', 'test', self.not_logged_user)
+        self.group = scripts.create_group('test', 'test', self.not_logged_user)
         self.url = reverse('group_view', args=(self.group.pk,))
 
     def test_not_logged_user_cannot_access(self):
@@ -222,14 +223,14 @@ class GroupViewTests(TestCase):
         and all elements in tabs."""
 
         utils.create_user_and_authenticate(self)
-        group1 = utils.create_group('test1', 'test1', self.logged_user)
-        group2 = utils.create_group('test2', 'test2', self.logged_user)
-        tab_in_group1 = utils.create_tab('test1', self.logged_user, group1)
-        tab_in_group2 = utils.create_tab('test2', self.logged_user, group2)
-        element_in_group1 = utils.create_element(
+        group1 = scripts.create_group('test1', 'test1', self.logged_user)
+        group2 = scripts.create_group('test2', 'test2', self.logged_user)
+        tab_in_group1 = scripts.create_tab('test1', self.logged_user, group1)
+        tab_in_group2 = scripts.create_tab('test2', self.logged_user, group2)
+        element_in_group1 = scripts.create_element(
             'test1', 'test1', self.logged_user, tab_in_group1
         )
-        element_in_group2 = utils.create_element(
+        element_in_group2 = scripts.create_element(
             'test2', 'test2', self.logged_user, tab_in_group2
         )
 
@@ -252,7 +253,7 @@ class JoinGroupViewTests(TestCase):
 
     def setUp(self) -> None:
         self.not_logged_user = utils.create_user('notlogged', 'notlogged')
-        self.group = utils.create_group('test', 'test', self.not_logged_user)
+        self.group = scripts.create_group('test', 'test', self.not_logged_user)
         self.url = reverse('join_group_view', args=(self.group.pk,))
 
     def test_not_logged_user_cannot_access(self):
@@ -309,8 +310,8 @@ class MyGroupsViewTests(TestCase):
         """Test if logged user see only joined groups."""
 
         utils.create_two_users_authenticate_one(self)
-        seen = utils.create_group('seen', 'seen', self.logged_user)
-        unseen = utils.create_group('unseen', 'unseen', self.not_logged_user)
+        seen = scripts.create_group('seen', 'seen', self.logged_user)
+        unseen = scripts.create_group('unseen', 'unseen', self.not_logged_user)
 
         response = self.client.get(self.url)
         seen_groups = response.context['groups']
@@ -324,7 +325,7 @@ class LeaveGroupViewTests(TestCase):
 
     def setUp(self) -> None:
         self.not_logged_user = utils.create_user('notlogged', 'notlogged')
-        self.group = utils.create_group('test', 'test', self.not_logged_user)
+        self.group = scripts.create_group('test', 'test', self.not_logged_user)
         self.url = reverse('leave_group_view', args=(self.group.pk,))
 
     def test_not_logged_user_cannot_leave(self):

@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import reverse
 
 from ..models import Tab
+from .. import scripts
 from . import utils_for_testing as utils
 
 User = get_user_model()
@@ -13,7 +14,7 @@ class CreateTabViewTests(TestCase):
 
     def setUp(self) -> None:
         self.not_logged_user = utils.create_user('notlogged', 'notlogged')
-        self.group = utils.create_group('test', 'test', self.not_logged_user)
+        self.group = scripts.create_group('test', 'test', self.not_logged_user)
         self.url = reverse('create_tab_view', args=(self.group.pk,))
         self.data = {
             'name': 'new',
@@ -67,8 +68,8 @@ class UpdateTabViewTests(TestCase):
 
     def setUp(self) -> None:
         self.not_logged_user = utils.create_user('notlogged', 'notlogged')
-        self.group = utils.create_group('test', 'test', self.not_logged_user)
-        self.tab = utils.create_tab('test', self.not_logged_user, self.group)
+        self.group = scripts.create_group('test', 'test', self.not_logged_user)
+        self.tab = scripts.create_tab('test', self.not_logged_user, self.group)
         self.url = reverse('update_tab_view', args=(self.group.pk, self.tab.pk))
         self.data = {
             'name': 'new',
@@ -138,8 +139,8 @@ class DeleteTabViewTests(TestCase):
 
     def setUp(self) -> None:
         self.not_logged_user = utils.create_user('notlogged', 'notlogged')
-        self.group = utils.create_group('test', 'test', self.not_logged_user)
-        self.tab = utils.create_tab('test', self.not_logged_user, self.group)
+        self.group = scripts.create_group('test', 'test', self.not_logged_user)
+        self.tab = scripts.create_tab('test', self.not_logged_user, self.group)
         self.url = reverse('delete_tab_view', args=(self.group.pk, self.tab.pk))
 
     def test_not_logged_cannot_delete_tab(self):
