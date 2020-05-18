@@ -19,6 +19,7 @@ class Group(models.Model):
         description:    description of the group,
         creator:        user that created the group,
         users:          users in the group,
+        created_date:   date when group was created.
     """
     name = models.CharField(max_length=40)
     description = models.CharField(max_length=90)
@@ -27,7 +28,9 @@ class Group(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.pk}. {self.name} created by {self.creator.username}.'
+        return f'{self.pk}. Group "{self.name}" ' \
+               f'created by "{self.creator.username}" ' \
+               f'at {self.created_date}.'
 
 
 class Tab(models.Model):
@@ -36,7 +39,8 @@ class Tab(models.Model):
     Fields:
         name:       name of the tab,
         creator:    user that created the tab,
-        group:      group that the tab belongs to.
+        group:      group that the tab belongs to,
+        created_date:   date when tab was created.
     """
     name = models.CharField(max_length=45)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -44,19 +48,20 @@ class Tab(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.group.name} -> {self.name} ' \
-               f'created by {self.creator.username}'
+        return f'Group: "{self.group.name}" -> Tab: "{self.name}" ' \
+               f'created by "{self.creator.username}" at {self.created_date}'
 
 
 class Element(models.Model):
     """Element model.
 
     Fields:
-        name:       name of the element,
-        creator:    user that created the element,
-        text:       text of the element,
-        image:      image in element,
-        tab:        tab that the element belongs to.
+        name:           name of the element,
+        creator:        user that created the element,
+        text:           text of the element,
+        image:          image in element,
+        tab:            tab that the element belongs to,
+        created_date:   date when element was created.
     """
     name = models.CharField(max_length=45)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -66,5 +71,6 @@ class Element(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.tab.group.name}->{self.tab.name}->{self.name} ' \
-               f'created by {self.creator.username}'
+        return f'Group: "{self.tab.group.name}" -> Tab: "{self.tab.name}" -> '\
+               f'Element: "{self.name}" created by "{self.creator.username}" '\
+               f'at {self.created_date}'
