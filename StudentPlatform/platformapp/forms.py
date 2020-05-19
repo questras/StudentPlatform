@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
-from .models import Group, Tab
+from .models import Group, Tab, Element
 
 User = get_user_model()
 
@@ -28,6 +28,14 @@ class CreateTabForm(forms.ModelForm):
     class Meta:
         model = Tab
         fields = ('name',)
+
+
+class CreateElementForm(forms.ModelForm):
+    """Form for creating new elements."""
+
+    class Meta:
+        model = Element
+        fields = ('name', 'text', 'image',)
 
 
 class RegistrationForm(UserCreationForm):
