@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <h2>{{ element.name }}</h2>
+    <p>by <b><i>{{ element.creator.username }}</i></b> at <i>{{ element.created_date }}</i></p>
+    <p>{{ element.text }}</p>
+    {% if element.image %}
+        <p><img src="{{ element.image.url }}"></p>
+    {% endif %}
+{% endblock %}
