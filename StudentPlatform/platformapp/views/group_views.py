@@ -3,6 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import reverse, render, get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.db.models import Q
 
 from ..models import Group, Tab, Element
 from ..forms import CreateGroupForm, UpdateGroupForm
@@ -152,8 +153,25 @@ def join_group_view(request, pk):
     return render(request, 'platformapp/join_group_view.html', context)
 
 
+@login_required
 def search_groups_view(request):
-    pass
+    """A view for searching groups."""
+
+    context = {
+        'search_result': []
+    }
+
+    if request.method == 'POST':
+        query = request.POST['search_query']
+        if query != '':
+            search_result = Group.objects.filter(
+                Q(name__icontains=query) |
+                Q(description__icontains=query) |
+                Q(creator__username__icontains=query)
+            )
+            context['search_result'] = search_result
+
+    return render(request, 'platformapp/search_groups_view.html', context)
 
 
 @login_required

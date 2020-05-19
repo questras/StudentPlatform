@@ -359,3 +359,29 @@ class LeaveGroupViewTests(TestCase):
         self.assertRedirects(response, reverse('my_groups_view'))
         self.assertNotIn(self.logged_user, self.group.users.all())
         self.assertNotIn(self.group, self.logged_user.joined_groups.all())
+
+
+class SearchGroupsViewTests(TestCase):
+    """Test for search_groups_view."""
+
+    def setUp(self) -> None:
+        self.url = reverse('search_groups_view')
+
+    def test_not_logged_user_cannot_access(self):
+        """Test if not logged user cannot access the view."""
+
+        utils.test_not_logged_cannot_access(self, self.url)
+
+    def test_logged_user_can_access(self):
+        """Test if logged user can access the view."""
+
+        utils.create_user_and_authenticate(self)
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+        data = {
+            'search_query': 'test'
+        }
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
