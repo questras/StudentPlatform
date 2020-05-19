@@ -30,13 +30,11 @@ class ElementViewTests(TestCase):
         utils.create_user_and_authenticate(self)
         expected_url = reverse('my_groups_view')
 
-        response = self.client.get(self.url)
-        self.assertRedirects(response, expected_url=expected_url)
+        utils.test_cannot_access(self, self.url, expected_url)
 
     def test_logged_user_in_group_can_access(self):
         """Test if logged user in element's group can access view."""
 
         self.client.login(username='notlogged', password='notlogged')
+        utils.test_can_access(self, self.url)
 
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
