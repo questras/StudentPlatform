@@ -3,9 +3,24 @@
 
 {% block content %}
     <h2>{{ element.name }}</h2>
+
     <p>by <b><i>{{ element.creator.username }}</i></b> at <i>{{ element.created_date }}</i></p>
+
+    {% if request.user.id == element.creator.id %}
+        <p>
+            <a href="{% url 'delete_element_view' group.pk tab.pk element.pk %}">
+                <button class="btn btn-danger">Delete post</button>
+            </a>
+            <a href="{% url 'update_element_view' group.pk tab.pk element.pk %}">
+                <button class="btn btn-warning">Edit post</button>
+            </a>
+        </p>
+    {% endif %}
+
     <p>{{ element.text }}</p>
+
     {% if element.image %}
         <p><img src="{{ element.image.url }}"></p>
     {% endif %}
+
 {% endblock %}

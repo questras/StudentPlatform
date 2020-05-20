@@ -5,22 +5,35 @@
     <h3>Description: {{ group.description }}</h3>
     <h4>Creator: {{ group.creator.username }}</h4>
 
+    {# Delete and Edit buttons if user is creator. #}
     {% if request.user.id == group.creator.id %}
         <a href="{% url 'delete_group_view' group.id %}">
             <button class="btn btn-danger">Delete Group</button>
         </a>
+        <a href="{% url 'update_group_view' group.id %}">
+            <button class="btn btn-warning">Edit Group</button>
+        </a>
+        {# Leave button if user is not a creator. #}
     {% else %}
         <a href="{% url 'leave_group_view' group.id %}">
             <button class="btn btn-warning">Leave Group</button>
         </a>
     {% endif %}
 
-    <h2>Posts:</h2>
+    {# Create tab button. #}
+    <h2>
+        <a href="{% url 'create_tab_view' group.id %}">
+            <button class="btn btn-primary">Create Tab</button>
+        </a>
+    </h2>
+    {# Posts accordion. #}
     <div id="groupPosts">
+        {# Card for every tab. #}
         {% for tab, elements in tabs_dict.items %}
             <div class="card">
                 <div class="card-header" id="heading{{ forloop.counter }}">
                     <h5 class="mb-0">
+
                         <button
                                 class="btn btn-link"
                                 data-toggle="collapse"
@@ -29,8 +42,33 @@
                         >
                             {{ tab.name }}
                         </button>
+
+                        {# Edit and delete link for tab's creator. #}
+                        {% if tab.creator.id == request.user.id %}
+                            <a href="{% url 'update_tab_view' group.pk tab.pk %}">
+                                --edit--
+                            </a>
+                            <a href="{% url 'delete_tab_view' group.pk tab.pk %}">
+                                --delete--
+                            </a>
+                        {% endif %}
+
                     </h5>
                 </div>
+                {# Create Post button #}
+                <div
+                        id="collapse{{ forloop.counter }}add"
+                        class="collapse multi{{ forloop.counter }}"
+                        aria-labelledby="heading{{ forloop.counter }}"
+                        data-parent="#accordion"
+                >
+                    <div class="card-body">
+                        <a href="{% url 'create_element_view' group.pk tab.pk %}">
+                            <button class="btn btn-primary">Create Post</button>
+                        </a>
+                    </div>
+                </div>
+                {# Links to posts. #}
                 {% for element in elements %}
                     <div
                             id="collapse{{ forloop.parentloop.counter }}{{ forloop.counter }}"
