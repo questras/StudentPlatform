@@ -82,7 +82,7 @@ def delete_element_view(request, g_pk, t_pk, pk):
 
     if user not in group.users.all():
         return redirect(reverse('my_groups_view'))
-    elif user.id != group.creator.id:
+    elif user.id != element.creator.id:
         return redirect(reverse('element_view',
                                 args=(group.pk, tab.pk, element.pk,)))
 
