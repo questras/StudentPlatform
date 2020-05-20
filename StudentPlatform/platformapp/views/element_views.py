@@ -49,7 +49,7 @@ def update_element_view(request, g_pk, t_pk, pk):
 
     if user not in group.users.all():
         return redirect(reverse('my_groups_view'))
-    elif user.id != group.creator.id:
+    elif user.id != element.creator.id:
         return redirect(element_view_url)
 
     if request.method == 'POST':
@@ -105,6 +105,8 @@ def element_view(request, g_pk, t_pk, pk):
         return redirect(reverse('my_groups_view'))
 
     context = {
+        'group': group,
+        'tab': tab,
         'element': element,
     }
 
