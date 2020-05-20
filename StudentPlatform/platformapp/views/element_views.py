@@ -71,8 +71,26 @@ def update_element_view(request, g_pk, t_pk, pk):
     return render(request, 'platformapp/update_element_view.html', context)
 
 
-class DeleteElementView(DeleteView):
-    pass
+@login_required
+def delete_element_view(request, g_pk, t_pk, pk):
+    """A view for deleting existing elements."""
+
+    group = get_object_or_404(Group, pk=g_pk)
+    tab = get_object_or_404(Tab, pk=t_pk)
+    element = get_object_or_404(Element, pk=pk)
+    user = request.user
+
+    if user not in group.users.all():
+        return redirect(reverse('my_groups_view'))
+    elif user.id != group.creator.id:
+        return redirect(reverse('element_view',
+                                args=(group.pk, tab.pk, element.pk,)))
+
+    if request.method == 'POST':
+        element.delete()
+        return redirect(reverse('group_view', args=(group.pk,)))
+
+    return render(request, 'platformapp/delete_element_view.html')
 
 
 @login_required

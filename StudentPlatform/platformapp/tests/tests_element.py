@@ -1,10 +1,9 @@
 from django.test import TestCase
 from django.shortcuts import reverse
-from django.core.files.uploadedfile import SimpleUploadedFile
 
 from . import utils_for_testing as utils
 from .. import scripts
-from ..models import Group, Tab, Element
+from ..models import Element
 
 
 def element_test_setup(view_name):
@@ -199,3 +198,54 @@ class UpdateElementViewTests(TestCase):
             updated_element = Element.objects.all()[0]
             self.assertEqual(updated_element.name, 'test')
             self.assertEqual(updated_element.text, 'test')
+
+
+class DeleteElementViewTests(TestCase):
+    """Tests for delete_element_view."""
+
+    def setUp(self) -> None:
+        self.args = element_test_setup('delete_element_view')
+
+    def test_not_logged_cannot_access(self):
+        """Test if not logged user cannot access view."""
+
+        utils.test_not_logged_cannot_access(self, self.args['url'])
+
+    def test_logged_user_not_in_group_cannot_access(self):
+        """Test if logged user not in element's group cannot
+        access view."""
+
+        utils.create_user_and_authenticate(self)
+        expected_url = reverse('my_groups_view')
+
+        utils.test_cannot_access(self, self.args['url'], expected_url)
+
+    def test_logged_user_not_creator_cannot_access(self):
+        """Test if logged user in element's group who is not
+        element's creator cannot access view."""
+
+        utils.create_user_and_authenticate(self)
+        self.args['group'].users.add(self.logged_user)
+        url_args = (
+            self.args['group'].pk, self.args['tab'].pk, self.args['element'].pk,
+        )
+        expected_url = reverse('element_view', args=url_args)
+
+        utils.test_cannot_access(self, self.args['url'],
+                                 expected_url=expected_url)
+
+        # Object is not deleted.
+        self.assertEqual(len(Element.objects.all()), 1)
+
+    def test_creator_in_group_can_delete(self):
+        """Test if creator of element who is in element's group can
+        delete the element and is redirected to element's group view."""
+
+        self.client.login(username='notlogged', password='notlogged')
+        expected_url = reverse('group_view', args=(self.args['group'].pk,))
+
+        utils.test_can_access(self, self.args['url'],
+                              get_redirect_url=None,
+                              post_redirect_url=expected_url)
+        # Object is deleted.
+        self.assertEqual(len(Element.objects.all()), 0)
