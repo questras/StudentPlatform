@@ -30,7 +30,7 @@ urlpatterns = [
     # Element views:
     path('group/<int:g_pk>/tab/<int:t_pk>/create_element/', create_element_view, name='create_element_view'),
     path('group/<int:g_pk>/tab/<int:t_pk>/element/<int:pk>/', element_view, name='element_view'),
-    path('group/<int:g_pk>/tab/<int:t_pk>/element/<int:pk>/update', UpdateElementView.as_view(),
+    path('group/<int:g_pk>/tab/<int:t_pk>/element/<int:pk>/update', update_element_view,
          name='update_element_view'),
     path('group/<int:g_pk>/tab/<int:t_pk>/element/<int:pk>/delete', DeleteElementView.as_view(),
          name='delete_element_view'),

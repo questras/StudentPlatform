@@ -36,8 +36,39 @@ def create_element_view(request, g_pk, t_pk):
     return render(request, 'platformapp/create_element_view.html', context)
 
 
-class UpdateElementView(UpdateView):
-    pass
+@login_required
+def update_element_view(request, g_pk, t_pk, pk):
+    """A view for updating existing elements."""
+
+    group = get_object_or_404(Group, pk=g_pk)
+    tab = get_object_or_404(Tab, pk=t_pk)
+    element = get_object_or_404(Element, pk=pk)
+    user = request.user
+    element_view_url = reverse('element_view',
+                               args=(group.pk, tab.pk, element.pk,))
+
+    if user not in group.users.all():
+        return redirect(reverse('my_groups_view'))
+    elif user.id != group.creator.id:
+        return redirect(element_view_url)
+
+    if request.method == 'POST':
+        form = CreateElementForm(data=request.POST, files=request.FILES)
+        if form.is_valid():
+            element.name = form.cleaned_data['name']
+            element.text = form.cleaned_data['text']
+            element.image = form.cleaned_data['image']
+            element.save()
+            return redirect(element_view_url)
+        else:
+            return HttpResponseBadRequest()
+
+    form = CreateElementForm(instance=element)
+    context = {
+        'form': form,
+    }
+
+    return render(request, 'platformapp/update_element_view.html', context)
 
 
 class DeleteElementView(DeleteView):
