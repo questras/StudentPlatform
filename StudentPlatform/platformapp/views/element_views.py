@@ -23,6 +23,23 @@ def create_element(form: CreateElementForm, user: User, tab: Tab) -> Element:
     return element
 
 
+def update_element(element: Element, form: CreateElementForm) -> Element:
+    """Update element with data from form."""
+
+    element.name = form.cleaned_data['name']
+    element.text = form.cleaned_data['text']
+
+    if form.cleaned_data['image'] is False:
+        # "Clear" checkbox in form was selected.
+        element.image = None
+
+    if form.cleaned_data['image']:
+        # New image was specified.
+        element.image = form.cleaned_data['image']
+
+    return element
+
+
 @login_required
 def create_element_view(request, g_pk, t_pk):
     """A view for creating new elements."""
@@ -49,23 +66,6 @@ def create_element_view(request, g_pk, t_pk):
     }
 
     return render(request, 'platformapp/create_element_view.html', context)
-
-
-def update_element(element: Element, form: CreateElementForm) -> Element:
-    """Update element with data from form."""
-
-    element.name = form.cleaned_data['name']
-    element.text = form.cleaned_data['text']
-
-    if form.cleaned_data['image'] is False:
-        # "Clear" checkbox in form was selected.
-        element.image = None
-
-    if form.cleaned_data['image']:
-        # New image was specified.
-        element.image = form.cleaned_data['image']
-
-    return element
 
 
 @login_required
