@@ -1,10 +1,26 @@
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseBadRequest
+from django.contrib.auth import get_user_model
 
 from ..forms import CreateElementForm
 from ..models import Group, Tab, Element
+
+User = get_user_model()
+
+
+def create_element(form: CreateElementForm, user: User, tab: Tab) -> Element:
+    """Create element with data from form, user as creator
+    and tab as element's tab."""
+
+    element = Element(
+        name=form.cleaned_data['name'],
+        text=form.cleaned_data['text'],
+        image=form.cleaned_data['image'],
+        creator=user,
+        tab=tab
+    )
+    return element
 
 
 @login_required
@@ -20,9 +36,7 @@ def create_element_view(request, g_pk, t_pk):
     if request.method == 'POST':
         form = CreateElementForm(data=request.POST, files=request.FILES)
         if form.is_valid():
-            element = form.save(commit=False)
-            element.creator = request.user
-            element.tab = tab
+            element = create_element(form, request.user, tab)
             element.save()
             return redirect(reverse('element_view',
                                     args=(group.pk, tab.pk, element.pk)))
@@ -35,6 +49,23 @@ def create_element_view(request, g_pk, t_pk):
     }
 
     return render(request, 'platformapp/create_element_view.html', context)
+
+
+def update_element(element: Element, form: CreateElementForm) -> Element:
+    """Update element with data from form."""
+
+    element.name = form.cleaned_data['name']
+    element.text = form.cleaned_data['text']
+
+    if form.cleaned_data['image'] is False:
+        # "Clear" checkbox in form was selected.
+        element.image = None
+
+    if form.cleaned_data['image']:
+        # New image was specified.
+        element.image = form.cleaned_data['image']
+
+    return element
 
 
 @login_required
@@ -56,9 +87,7 @@ def update_element_view(request, g_pk, t_pk, pk):
     if request.method == 'POST':
         form = CreateElementForm(data=request.POST, files=request.FILES)
         if form.is_valid():
-            element.name = form.cleaned_data['name']
-            element.text = form.cleaned_data['text']
-            element.image = form.cleaned_data['image']
+            element = update_element(element, form)
             element.save()
             return redirect(element_view_url)
         else:
