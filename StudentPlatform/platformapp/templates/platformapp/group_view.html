@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Welcome to {{ group.name }}</h2>
-    <h3>Description: {{ group.description }}</h3>
-    <h4>Creator: {{ group.creator.username }}</h4>
+    <h1>{{ group.name }}</h1>
+    <h4>Description: {{ group.description }}</h4>
+    <p>by <b><i>{{ group.creator.username }}</i></b> at <i>{{ group.created_date }}</i></p>
 
     {# Delete and Edit buttons if user is creator. #}
     {% if request.user.id == group.creator.id %}
