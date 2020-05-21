@@ -12,7 +12,7 @@ urlpatterns = [
     path('feed/', feed_view, name='feed_view'),
     # Authentication views:
     path('auth/signup/', SignUpView.as_view(), name='signup_view'),
-    path('auth/login/', LoginView.as_view(), name='login_view'),
+    path('auth/login/', LoginView.as_view(redirect_authenticated_user=True), name='login_view'),
     path('auth/logout/', logout_view, name='logout_view'),
     # Group views:
     path('group/<int:pk>/', group_view, name='group_view'),
