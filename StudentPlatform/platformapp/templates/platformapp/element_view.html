@@ -22,6 +22,10 @@
 
     <p>
         by <b><i>{{ element.creator.username }}</i></b> at <i>{{ element.created_date }}</i>
+        <br>
+        {% if element.last_edit_date %}
+            last edit at <i>{{ element.last_edit_date }}</i>
+        {% endif %}
     </p>
 
     <p>

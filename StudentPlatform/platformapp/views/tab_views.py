@@ -1,6 +1,7 @@
 from django.http import HttpResponseBadRequest
 from django.shortcuts import reverse, redirect, get_object_or_404, render
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 
 from ..models import Group, Tab
 from ..forms import CreateTabForm
@@ -54,6 +55,7 @@ def update_tab_view(request, g_pk, pk):
         form = CreateTabForm(request.POST)
         if form.is_valid():
             tab.name = form.cleaned_data['name']
+            tab.last_edit_date = timezone.now()
             tab.save()
             return redirect(reverse('group_view', args=(group.pk,)))
         else:

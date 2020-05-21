@@ -19,13 +19,16 @@ class Group(models.Model):
         description:    description of the group,
         creator:        user that created the group,
         users:          users in the group,
-        created_date:   date when group was created.
+        created_date:   date when group was created,
+        last_edit_date: date when group was edited the last time,
+                        initially NULL.
     """
     name = models.CharField(max_length=40)
     description = models.CharField(max_length=90)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     users = models.ManyToManyField(User, related_name='joined_groups')
     created_date = models.DateTimeField(auto_now_add=True)
+    last_edit_date = models.DateTimeField(null=True)
 
     def __str__(self):
         return f'{self.pk}. Group "{self.name}" ' \
@@ -37,15 +40,18 @@ class Tab(models.Model):
     """Tab model.
 
     Fields:
-        name:       name of the tab,
-        creator:    user that created the tab,
-        group:      group that the tab belongs to,
-        created_date:   date when tab was created.
+        name:           name of the tab,
+        creator:        user that created the tab,
+        group:          group that the tab belongs to,
+        created_date:   date when tab was created,
+        last_edit_date: date when tab was edited the last time,
+                        initially NULL.
     """
     name = models.CharField(max_length=45)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
+    last_edit_date = models.DateTimeField(null=True)
 
     def __str__(self):
         return f'Group: "{self.group.name}" -> Tab: "{self.name}" ' \
@@ -61,7 +67,9 @@ class Element(models.Model):
         text:           text of the element,
         image:          image in element,
         tab:            tab that the element belongs to,
-        created_date:   date when element was created.
+        created_date:   date when element was created,
+        last_edit_date: date when element was edited the last time,
+                        initially NULL.
     """
     name = models.CharField(max_length=45)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -69,6 +77,7 @@ class Element(models.Model):
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     tab = models.ForeignKey(Tab, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
+    last_edit_date = models.DateTimeField(null=True)
 
     def __str__(self):
         return f'Group: "{self.tab.group.name}" -> Tab: "{self.tab.name}" -> '\

@@ -121,6 +121,7 @@ class UpdateTabViewTests(TestCase):
 
         updated_tab = Tab.objects.get(pk=self.tab.pk)
         self.assertEqual(updated_tab.name, 'new')
+        self.assertIsNotNone(updated_tab.last_edit_date)
 
     def test_cannot_update_tab_with_empty_field(self):
         """Test if cannot update tab with empty field."""
@@ -132,6 +133,7 @@ class UpdateTabViewTests(TestCase):
 
         tab = Tab.objects.get(pk=self.tab.pk)
         self.assertEqual(tab.name, 'test')
+        self.assertIsNone(tab.last_edit_date)
 
 
 class DeleteTabViewTests(TestCase):

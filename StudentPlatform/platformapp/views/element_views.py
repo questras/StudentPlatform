@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseBadRequest
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 from ..forms import CreateElementForm
 from ..models import Group, Tab, Element
@@ -28,6 +29,7 @@ def update_element(element: Element, form: CreateElementForm) -> Element:
 
     element.name = form.cleaned_data['name']
     element.text = form.cleaned_data['text']
+    element.last_edit_date = timezone.now()
 
     if form.cleaned_data['image'] is False:
         # "Clear" checkbox in form was selected.

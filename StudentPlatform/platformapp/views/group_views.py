@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import reverse, render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.db.models import Q
+from django.utils import timezone
 
 from ..models import Group, Tab, Element
 from ..forms import CreateGroupForm, UpdateGroupForm
@@ -55,6 +56,7 @@ def update_group_view(request, pk):
         if form.is_valid():
             group.name = form.cleaned_data['name']
             group.description = form.cleaned_data['description']
+            group.last_edit_date = timezone.now()
             group.save()
 
             return redirect(reverse('group_view', args=(group.pk,)))

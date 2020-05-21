@@ -115,6 +115,7 @@ class UpdateGroupViewTests(TestCase):
         updated_group = Group.objects.get(pk=self.group.pk)
         self.assertEqual(updated_group.name, 'new')
         self.assertEqual(updated_group.description, 'new')
+        self.assertIsNotNone(updated_group.last_edit_date)
 
     def test_cannot_update_with_empty_field(self):
         """Test if cannot update group with one or more empty fields"""
@@ -128,6 +129,7 @@ class UpdateGroupViewTests(TestCase):
             group = Group.objects.get(pk=self.group.pk)
             self.assertEqual(group.name, 'test')
             self.assertEqual(group.description, 'test')
+            self.assertIsNone(group.last_edit_date)
 
 
 class DeleteGroupViewTests(TestCase):

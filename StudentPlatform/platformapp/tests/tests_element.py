@@ -166,6 +166,7 @@ class UpdateElementViewTests(TestCase):
         updated_element = Element.objects.all()[0]
         self.assertEqual(updated_element.name, 'test')
         self.assertEqual(updated_element.text, 'test')
+        self.assertIsNone(updated_element.last_edit_date)
 
     def test_creator_in_group_can_update(self):
         """Test if creator of element who is in element's group can
@@ -185,6 +186,7 @@ class UpdateElementViewTests(TestCase):
         updated_element = Element.objects.all()[0]
         self.assertEqual(updated_element.name, 'new')
         self.assertEqual(updated_element.text, 'new')
+        self.assertIsNotNone(updated_element.last_edit_date)
 
     def test_cannot_update_with_empty_field(self):
         """Test if cannot update element with empty name
@@ -200,6 +202,7 @@ class UpdateElementViewTests(TestCase):
             updated_element = Element.objects.all()[0]
             self.assertEqual(updated_element.name, 'test')
             self.assertEqual(updated_element.text, 'test')
+            self.assertIsNone(updated_element.last_edit_date)
 
 
 class DeleteElementViewTests(TestCase):
