@@ -96,7 +96,9 @@ class CreateElementViewTests(TestCase):
 
         utils.create_user_and_authenticate(self)
         self.group.users.add(self.logged_user)
-        post_expected_url = reverse('group_view', args=(self.group.pk,))
+        # 1 is id of created element in the future.
+        post_expected_url = reverse('element_view',
+                                    args=(self.group.pk, self.tab.pk, 1))
 
         utils.test_can_access(self, self.url,
                               get_redirect_url=None,

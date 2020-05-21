@@ -24,7 +24,8 @@ def create_element_view(request, g_pk, t_pk):
             element.creator = request.user
             element.tab = tab
             element.save()
-            return redirect(reverse('group_view', args=(group.pk,)))
+            return redirect(reverse('element_view',
+                                    args=(group.pk, tab.pk, element.pk)))
         else:
             return HttpResponseBadRequest()
 
