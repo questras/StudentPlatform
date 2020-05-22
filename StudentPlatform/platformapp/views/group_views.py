@@ -126,6 +126,24 @@ def group_view(request, pk):
 
 
 @login_required
+def group_members_view(request, pk):
+    """A view with members of group."""
+
+    group = get_object_or_404(Group, pk=pk)
+    members = group.users.all()
+
+    if request.user not in members:
+        return redirect(reverse('my_groups_view'))
+
+    context = {
+        'group': group,
+        'members': members,
+    }
+
+    return render(request, 'platformapp/group_members_view.html', context)
+
+
+@login_required
 def my_groups_view(request):
     groups = request.user.joined_groups.all()
     context = {

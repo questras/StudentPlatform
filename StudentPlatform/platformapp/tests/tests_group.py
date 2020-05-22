@@ -250,6 +250,67 @@ class GroupViewTests(TestCase):
         )
 
 
+class GroupMembersViewTests(TestCase):
+    """Tests for group_members_view."""
+
+    def setUp(self) -> None:
+        self.not_logged_user = utils.create_user('notlogged', 'notlogged')
+        self.group = scripts.create_group('test', 'test', self.not_logged_user)
+        self.url = reverse('group_members_view', args=(self.group.pk,))
+
+    def test_not_logged_cannot_access(self):
+        """Test if not logged user cannot access."""
+
+        utils.test_not_logged_cannot_access(self, self.url)
+
+    def test_logged_user_not_in_group_cannot_access(self):
+        """Test if logged user not in group cannot access."""
+
+        utils.create_user_and_authenticate(self)
+        expected_url = reverse('my_groups_view')
+        utils.test_cannot_access(self, self.url, expected_url)
+
+    def test_logged_user_in_group_can_access(self):
+        """Test if logged user in group can access."""
+
+        utils.create_user_and_authenticate(self)
+        self.group.users.add(self.logged_user)
+
+        utils.test_can_access(self, self.url)
+
+    def test_all_users_in_group_are_seen(self):
+        """Test if all users in group are in view's context."""
+
+        utils.create_user_and_authenticate(self)
+        self.group.users.add(self.logged_user)
+
+        test_users_in_group = []
+        test_users_not_in_group = []
+        number_of_users = 10
+
+        # Create test users that are in group.
+        for i in range(number_of_users):
+            user = scripts.create_user(f'test_in{i}', f'test_in{i}')
+            test_users_in_group.append(user)
+            self.group.users.add(user)
+
+        # Create test users that are not in group.
+        for i in range(number_of_users):
+            user = scripts.create_user(f'test_not_in{i}', f'test_not_in{i}')
+            test_users_not_in_group.append(user)
+
+        response = self.client.get(self.url)
+        members = response.context['members']
+
+        self.assertIn(self.logged_user, members)
+
+        for user in test_users_in_group:
+            self.assertIn(user, members)
+
+        for user in test_users_not_in_group:
+            self.assertNotIn(user, members)
+
+
 class JoinGroupViewTests(TestCase):
     """Tests for join_group_view"""
 

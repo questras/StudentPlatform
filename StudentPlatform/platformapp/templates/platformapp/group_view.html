@@ -3,6 +3,9 @@
 {% block content %}
     <h1>{{ group.name }}</h1>
     <h4>Description: {{ group.description }}</h4>
+    <a href="{% url 'group_members_view' group.pk %}">
+        members
+    </a>
     <p>
         created by <b><i>{{ group.creator.username }}</i></b> at <i>{{ group.created_date }}</i>
         <br>
