@@ -61,9 +61,11 @@ class UpdateTabViewTests(TestCase):
     """Tests for update_tab_view."""
 
     def setUp(self) -> None:
-        self.not_logged_user = utils.create_user('notlogged', 'notlogged')
-        self.group = scripts.create_group('test', 'test', self.not_logged_user)
-        self.tab = scripts.create_tab('test', self.not_logged_user, self.group)
+        self.group_creator = utils.create_user('group', 'group')
+        self.group = scripts.create_group('test', 'test', self.group_creator)
+        self.tab_creator = utils.create_user('tab', 'tab')
+        self.group.users.add(self.tab_creator)
+        self.tab = scripts.create_tab('test', self.tab_creator, self.group)
         self.url = reverse('update_tab_view', args=(self.group.pk, self.tab.pk))
         self.data = {
             'name': 'new',
@@ -96,7 +98,7 @@ class UpdateTabViewTests(TestCase):
     def test_creator_in_group_can_update_tab(self):
         """Test if creator of the tab who is in the group can update."""
 
-        self.client.login(username='notlogged', password='notlogged')
+        self.client.login(username='tab', password='tab')
         expected_url = reverse('group_view', args=(self.group.pk,))
 
         utils.test_can_access(self, self.url,
@@ -110,7 +112,7 @@ class UpdateTabViewTests(TestCase):
     def test_cannot_update_tab_with_empty_field(self):
         """Test if cannot update tab with empty field."""
 
-        self.client.login(username='notlogged', password='notlogged')
+        self.client.login(username='tab', password='tab')
         tab_fields = ['name']
 
         utils.test_cannot_post_with_empty_fields(self, self.url, tab_fields)
@@ -124,9 +126,11 @@ class DeleteTabViewTests(TestCase):
     """Tests for delete_tab_view."""
 
     def setUp(self) -> None:
-        self.not_logged_user = utils.create_user('notlogged', 'notlogged')
-        self.group = scripts.create_group('test', 'test', self.not_logged_user)
-        self.tab = scripts.create_tab('test', self.not_logged_user, self.group)
+        self.group_creator = utils.create_user('group', 'group')
+        self.group = scripts.create_group('test', 'test', self.group_creator)
+        self.tab_creator = utils.create_user('tab', 'tab')
+        self.group.users.add(self.tab_creator)
+        self.tab = scripts.create_tab('test', self.tab_creator, self.group)
         self.url = reverse('delete_tab_view', args=(self.group.pk, self.tab.pk))
 
     def test_not_logged_cannot_delete_tab(self):
@@ -159,7 +163,7 @@ class DeleteTabViewTests(TestCase):
         """Test if creator of the tab who is in the group
         can delete the tab."""
 
-        self.client.login(username='notlogged', password='notlogged')
+        self.client.login(username='tab', password='tab')
         expected_url = reverse('group_view', args=(self.group.pk,))
 
         utils.test_can_access(self, self.url,
