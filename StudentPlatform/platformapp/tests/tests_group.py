@@ -28,17 +28,14 @@ class CreateGroupViewTests(TestCase):
         """Test if logged user can create group."""
 
         utils.create_user_and_authenticate(self)
-
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.post(self.url, self.data)
-        self.assertRedirects(response, reverse('my_groups_view'))
+        utils.test_can_access(self, self.url,
+                              post_redirect_url=reverse('my_groups_view'),
+                              data=self.data)
 
         groups = Group.objects.all()
         self.assertEqual(len(groups), 1)
-        self.assertEqual(groups[0].name, 'name')
-        self.assertEqual(groups[0].description, 'description')
+        self.assertEqual(groups[0].name, self.data['name'])
+        self.assertEqual(groups[0].description, self.data['description'])
         self.assertEqual(groups[0].creator, self.logged_user)
         self.assertEqual(len(groups[0].users.all()), 1)
 
@@ -46,14 +43,8 @@ class CreateGroupViewTests(TestCase):
         """Test if cannot create group with one or more empty fields"""
 
         utils.create_user_and_authenticate(self)
-
-        data = {'name': 'test'}
-        response = self.client.post(self.url, data)
-        self.assertEqual(response.status_code, 400)
-
-        data = {'description': 'test'}
-        response = self.client.post(self.url, data)
-        self.assertEqual(response.status_code, 400)
+        group_fields = ['name', 'description']
+        utils.test_cannot_post_with_empty_fields(self, self.url, group_fields)
 
 
 class UpdateGroupViewTests(TestCase):
@@ -80,11 +71,9 @@ class UpdateGroupViewTests(TestCase):
         utils.create_user_and_authenticate(self)
         expected_url = reverse('my_groups_view')
 
-        response = self.client.get(self.url)
-        self.assertRedirects(response, expected_url=expected_url)
-
-        response = self.client.post(self.url, self.data)
-        self.assertRedirects(response, expected_url=expected_url)
+        utils.test_cannot_access(self, self.url,
+                                 expected_url=expected_url,
+                                 data=self.data)
 
     def test_not_creator_cannot_update(self):
         """Test if user who is not a creator of group cannot update
@@ -94,11 +83,9 @@ class UpdateGroupViewTests(TestCase):
         self.group.users.add(self.logged_user)
         expected_url = reverse('my_groups_view')
 
-        response = self.client.get(self.url)
-        self.assertRedirects(response, expected_url=expected_url)
-
-        response = self.client.post(self.url, self.data)
-        self.assertRedirects(response, expected_url=expected_url)
+        utils.test_cannot_access(self, self.url,
+                                 expected_url=expected_url,
+                                 data=self.data)
 
     def test_creator_in_group_can_update(self):
         """Test if creator of group who is in it can update."""
@@ -106,30 +93,28 @@ class UpdateGroupViewTests(TestCase):
         self.client.login(username='notlogged', password='notlogged')
         expected_url = reverse('group_view', args=(self.group.pk,))
 
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.post(self.url, self.data)
-        self.assertRedirects(response, expected_url=expected_url)
+        utils.test_can_access(self, self.url,
+                              post_redirect_url=expected_url,
+                              data=self.data)
 
         updated_group = Group.objects.get(pk=self.group.pk)
-        self.assertEqual(updated_group.name, 'new')
-        self.assertEqual(updated_group.description, 'new')
+        self.assertEqual(updated_group.name, self.data['name'])
+        self.assertEqual(updated_group.description, self.data['description'])
         self.assertIsNotNone(updated_group.last_edit_date)
 
     def test_cannot_update_with_empty_field(self):
         """Test if cannot update group with one or more empty fields"""
 
         self.client.login(username='notlogged', password='notlogged')
-        data_list = [{'name': 'new'}, {'description': 'new'}]
+        group_fields = ['name', 'description']
 
-        for data in data_list:
-            self.client.post(self.url, data)
-            # Group's fields are unchanged.
-            group = Group.objects.get(pk=self.group.pk)
-            self.assertEqual(group.name, 'test')
-            self.assertEqual(group.description, 'test')
-            self.assertIsNone(group.last_edit_date)
+        utils.test_cannot_post_with_empty_fields(self, self.url, group_fields)
+
+        # Group is not updated.
+        updated_group = Group.objects.get(pk=self.group.pk)
+        self.assertEqual(updated_group.name, 'test')
+        self.assertEqual(updated_group.description, 'test')
+        self.assertIsNone(updated_group.last_edit_date)
 
 
 class DeleteGroupViewTests(TestCase):
@@ -152,11 +137,7 @@ class DeleteGroupViewTests(TestCase):
         utils.create_user_and_authenticate(self)
         expected_url = reverse('my_groups_view')
 
-        response = self.client.get(self.url)
-        self.assertRedirects(response, expected_url=expected_url)
-
-        response = self.client.post(self.url)
-        self.assertRedirects(response, expected_url=expected_url)
+        utils.test_cannot_access(self, self.url, expected_url)
         self.assertEqual(len(Group.objects.all()), 1)
 
     def test_not_creator_cannot_delete(self):
@@ -167,11 +148,7 @@ class DeleteGroupViewTests(TestCase):
         self.group.users.add(self.logged_user)
         expected_url = reverse('my_groups_view')
 
-        response = self.client.get(self.url)
-        self.assertRedirects(response, expected_url=expected_url)
-
-        response = self.client.post(self.url)
-        self.assertRedirects(response, expected_url=expected_url)
+        utils.test_cannot_access(self, self.url, expected_url)
         self.assertEqual(len(Group.objects.all()), 1)
 
     def test_creator_in_group_can_delete(self):
@@ -180,11 +157,8 @@ class DeleteGroupViewTests(TestCase):
         self.client.login(username='notlogged', password='notlogged')
         expected_url = reverse('my_groups_view')
 
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.post(self.url)
-        self.assertRedirects(response, expected_url=expected_url)
+        utils.test_can_access(self, self.url,
+                              post_redirect_url=expected_url)
         self.assertEqual(len(Group.objects.all()), 0)
 
 
@@ -208,8 +182,7 @@ class GroupViewTests(TestCase):
         utils.create_user_and_authenticate(self)
         expected_url = reverse('my_groups_view')
 
-        response = self.client.get(self.url)
-        self.assertRedirects(response, expected_url=expected_url)
+        utils.test_cannot_access(self, self.url, expected_url)
 
     def test_user_in_group_can_access(self):
         """Test if user in the group can access the group's view."""
@@ -217,8 +190,7 @@ class GroupViewTests(TestCase):
         utils.create_user_and_authenticate(self)
         self.group.users.add(self.logged_user)
 
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
+        utils.test_can_access(self, self.url)
 
     def test_view_contains_all_tabs_and_elements_related_to_group(self):
         """Test if view contains all tabs in the group
@@ -237,16 +209,18 @@ class GroupViewTests(TestCase):
         )
 
         response = self.client.get(reverse('group_view', args=(group1.pk,)))
+        context = response.context
+
         self.assertEqual(response.status_code, 200)
-        self.assertIn(tab_in_group1, response.context['tabs_dict'].keys())
-        self.assertNotIn(tab_in_group2, response.context['tabs_dict'].keys())
+        self.assertIn(tab_in_group1, context['tabs_dict'].keys())
+        self.assertNotIn(tab_in_group2, context['tabs_dict'].keys())
         self.assertIn(
             element_in_group1,
-            response.context['tabs_dict'][tab_in_group1]
+            context['tabs_dict'][tab_in_group1]
         )
         self.assertNotIn(
             element_in_group2,
-            response.context['tabs_dict'][tab_in_group1]
+            context['tabs_dict'][tab_in_group1]
         )
 
 
@@ -328,12 +302,11 @@ class JoinGroupViewTests(TestCase):
         """Test if logged user can join group."""
 
         utils.create_user_and_authenticate(self)
+        expected_url = reverse('my_groups_view')
 
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
+        utils.test_can_access(self, self.url,
+                              post_redirect_url=expected_url)
 
-        response = self.client.post(self.url)
-        self.assertRedirects(response, reverse('my_groups_view'))
         self.assertIn(self.logged_user, self.group.users.all())
         self.assertIn(self.group, self.logged_user.joined_groups.all())
 
@@ -365,9 +338,7 @@ class MyGroupsViewTests(TestCase):
         """Test if logged user can access the view."""
 
         utils.create_user_and_authenticate(self)
-
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
+        utils.test_can_access(self, self.url)
 
     def test_logged_user_see_only_joined_groups(self):
         """Test if logged user see only joined groups."""
@@ -378,6 +349,7 @@ class MyGroupsViewTests(TestCase):
 
         response = self.client.get(self.url)
         seen_groups = response.context['groups']
+
         self.assertEqual(len(seen_groups), 1)
         self.assertIn(seen, seen_groups)
         self.assertNotIn(unseen, seen_groups)
@@ -401,12 +373,11 @@ class LeaveGroupViewTests(TestCase):
 
         utils.create_user_and_authenticate(self)
         self.group.users.add(self.logged_user)
+        expected_url = reverse('my_groups_view')
 
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
+        utils.test_can_access(self, self.url,
+                              post_redirect_url=expected_url)
 
-        response = self.client.post(self.url)
-        self.assertRedirects(response, reverse('my_groups_view'))
         self.assertNotIn(self.logged_user, self.group.users.all())
         self.assertNotIn(self.group, self.logged_user.joined_groups.all())
 
@@ -439,12 +410,7 @@ class SearchGroupsViewTests(TestCase):
         """Test if logged user can access the view."""
 
         utils.create_user_and_authenticate(self)
-
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-        data = {
-            'search_query': 'test'
-        }
-        response = self.client.post(self.url, data)
-        self.assertEqual(response.status_code, 200)
+        data = {'search_query': 'test'}
+        utils.test_can_access(self, self.url,
+                              post_redirect_url=None,
+                              data=data)

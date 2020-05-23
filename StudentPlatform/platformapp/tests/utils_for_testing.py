@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.shortcuts import reverse
+from typing import List
 
 User = get_user_model()
 LOGIN_URL = reverse('login_view')
@@ -59,7 +60,6 @@ def test_cannot_access(test_case: TestCase, url: str,
 
 def test_can_access(test_case: TestCase,
                     url: str,
-                    get_redirect_url: str = None,
                     post_redirect_url: str = None,
                     data: dict = None):
     """Check if test_case can access url with
@@ -67,13 +67,27 @@ def test_can_access(test_case: TestCase,
     is redirected to expected url, if specified."""
 
     response = test_case.client.get(url)
-    if get_redirect_url:
-        test_case.assertRedirects(response, expected_url=get_redirect_url)
-    else:
-        test_case.assertEqual(response.status_code, 200)
+    test_case.assertEqual(response.status_code, 200)
 
     response = test_case.client.post(url, data)
     if post_redirect_url:
         test_case.assertRedirects(response, expected_url=post_redirect_url)
     else:
         test_case.assertEqual(response.status_code, 200)
+
+
+def test_cannot_post_with_empty_fields(test_case: TestCase,
+                                       url: str,
+                                       fields: List[str]):
+    """Check if POST requests to url with missing data fields
+    return 400 response code."""
+
+    # Check post request with no data.
+    response = test_case.client.post(url, data={})
+    test_case.assertEqual(response.status_code, 400)
+
+    # Check post request with only one field filled.
+    if len(fields) > 1:
+        for field in fields:
+            response = test_case.client.post(url, data={field: 'test'})
+            test_case.assertEqual(response.status_code, 400)

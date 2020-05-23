@@ -10,37 +10,33 @@ User = get_user_model()
 class SignUpViewTests(TestCase):
     """Tests for SignUpView."""
 
+    def setUp(self) -> None:
+        self.url = reverse('signup_view')
+        self.data = {
+            'username': 'test',
+            'password1': 'testtesttest',
+            'password2': 'testtesttest',
+        }
+
     def test_logged_in_cannot_sign_up(self):
         """Test if logged in user cannot sign up"""
 
         utils.create_user_and_authenticate(self)
 
         # Get request redirects to feed_view.
-        response = self.client.get(reverse('signup_view'))
+        response = self.client.get(self.url)
         self.assertRedirects(response, expected_url=reverse('feed_view'))
 
         # Post request redirects to feed_view.
-        signup_data = {
-            'username': 'test',
-            'password1': 'testtesttest',
-            'password2': 'testtesttest',
-        }
-        response = self.client.post(reverse('signup_view'), signup_data)
+        response = self.client.post(self.url, self.data)
         self.assertRedirects(response, expected_url=reverse('feed_view'))
 
     def test_not_logged_in_can_sign_up(self):
         """Test if not logged in user can sign up."""
 
-        response = self.client.get(reverse('signup_view'))
-        self.assertEquals(response.status_code, 200)
-
-        signup_data = {
-            'username': 'test',
-            'password1': 'testtesttest',
-            'password2': 'testtesttest',
-        }
-        response = self.client.post(reverse('signup_view'), signup_data)
-        self.assertRedirects(response, expected_url=reverse('login_view'))
+        utils.test_can_access(self, self.url,
+                              post_redirect_url=reverse('login_view'),
+                              data=self.data)
         self.assertEquals(len(User.objects.all()), 1)
 
     def test_cannot_sign_up_with_existing_username(self):
@@ -49,16 +45,9 @@ class SignUpViewTests(TestCase):
         User.objects.create_user(
             username='test',
             password='test',
-            email='test@test.com'
         ).save()
 
-        signup_data = {
-            'username': 'test',
-            'password1': 'testtesttest',
-            'password2': 'testtesttest',
-        }
-
-        response = self.client.post(reverse('signup_view'), signup_data)
+        response = self.client.post(reverse('signup_view'), self.data)
         # No redirect code.
         self.assertEquals(response.status_code, 200)
         # Exists only one user created earlier.

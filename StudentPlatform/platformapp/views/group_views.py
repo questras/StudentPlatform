@@ -5,6 +5,7 @@ from django.shortcuts import reverse, render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.db.models import Q
 from django.utils import timezone
+from django.http import HttpResponseBadRequest
 
 from ..models import Group, Tab, Element
 from ..forms import CreateGroupForm, UpdateGroupForm
@@ -60,6 +61,8 @@ def update_group_view(request, pk):
             group.save()
 
             return redirect(reverse('group_view', args=(group.pk,)))
+        else:
+            return HttpResponseBadRequest()
 
     form = UpdateGroupForm(instance=group)
     context = {

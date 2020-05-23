@@ -31,11 +31,7 @@ class CreateTabViewTests(TestCase):
         utils.create_user_and_authenticate(self)
         expected_url = reverse('my_groups_view')
 
-        response = self.client.get(self.url)
-        self.assertRedirects(response, expected_url=expected_url)
-
-        response = self.client.post(self.url, self.data)
-        self.assertRedirects(response, expected_url=expected_url)
+        utils.test_cannot_access(self, self.url, expected_url)
         self.assertEqual(len(Tab.objects.all()), 0)
 
     def test_user_in_group_can_create_tab(self):
@@ -45,11 +41,9 @@ class CreateTabViewTests(TestCase):
         self.group.users.add(self.logged_user)
         expected_url = reverse('group_view', args=(self.group.pk,))
 
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.post(self.url, self.data)
-        self.assertRedirects(response, expected_url=expected_url)
+        utils.test_can_access(self, self.url,
+                              post_redirect_url=expected_url,
+                              data=self.data)
         self.assertEqual(len(Tab.objects.all()), 1)
 
     def test_cannot_create_tab_with_empty_field(self):
@@ -57,9 +51,9 @@ class CreateTabViewTests(TestCase):
 
         utils.create_user_and_authenticate(self)
         self.group.users.add(self.logged_user)
+        tab_fields = ['name']
 
-        response = self.client.post(self.url, {})
-        self.assertEqual(response.status_code, 400)
+        utils.test_cannot_post_with_empty_fields(self, self.url, tab_fields)
         self.assertEqual(len(Tab.objects.all()), 0)
 
 
@@ -87,11 +81,7 @@ class UpdateTabViewTests(TestCase):
         utils.create_user_and_authenticate(self)
         expected_url = reverse('my_groups_view')
 
-        response = self.client.get(self.url)
-        self.assertRedirects(response, expected_url=expected_url)
-
-        response = self.client.post(self.url, self.data)
-        self.assertRedirects(response, expected_url=expected_url)
+        utils.test_cannot_access(self, self.url, expected_url, self.data)
 
     def test_not_creator_cannot_update_tab(self):
         """Test if user who is not a creator of the tab cannot update
@@ -101,11 +91,7 @@ class UpdateTabViewTests(TestCase):
         self.group.users.add(self.logged_user)
         expected_url = reverse('group_view', args=(self.group.pk,))
 
-        response = self.client.get(self.url)
-        self.assertRedirects(response, expected_url=expected_url)
-
-        response = self.client.post(self.url, self.data)
-        self.assertRedirects(response, expected_url=expected_url)
+        utils.test_cannot_access(self, self.url, expected_url, self.data)
 
     def test_creator_in_group_can_update_tab(self):
         """Test if creator of the tab who is in the group can update."""
@@ -113,11 +99,9 @@ class UpdateTabViewTests(TestCase):
         self.client.login(username='notlogged', password='notlogged')
         expected_url = reverse('group_view', args=(self.group.pk,))
 
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.post(self.url, self.data)
-        self.assertRedirects(response, expected_url=expected_url)
+        utils.test_can_access(self, self.url,
+                              post_redirect_url=expected_url,
+                              data=self.data)
 
         updated_tab = Tab.objects.get(pk=self.tab.pk)
         self.assertEqual(updated_tab.name, 'new')
@@ -127,9 +111,9 @@ class UpdateTabViewTests(TestCase):
         """Test if cannot update tab with empty field."""
 
         self.client.login(username='notlogged', password='notlogged')
+        tab_fields = ['name']
 
-        response = self.client.post(self.url, {})
-        self.assertEqual(response.status_code, 400)
+        utils.test_cannot_post_with_empty_fields(self, self.url, tab_fields)
 
         tab = Tab.objects.get(pk=self.tab.pk)
         self.assertEqual(tab.name, 'test')
@@ -157,11 +141,7 @@ class DeleteTabViewTests(TestCase):
         utils.create_user_and_authenticate(self)
         expected_url = reverse('my_groups_view')
 
-        response = self.client.get(self.url)
-        self.assertRedirects(response, expected_url=expected_url)
-
-        response = self.client.post(self.url)
-        self.assertRedirects(response, expected_url=expected_url)
+        utils.test_cannot_access(self, self.url, expected_url)
         self.assertEqual(len(Tab.objects.all()), 1)
 
     def test_not_creator_cannot_delete_tab(self):
@@ -172,11 +152,7 @@ class DeleteTabViewTests(TestCase):
         self.group.users.add(self.logged_user)
         expected_url = reverse('group_view', args=(self.group.pk,))
 
-        response = self.client.get(self.url)
-        self.assertRedirects(response, expected_url=expected_url)
-
-        response = self.client.post(self.url)
-        self.assertRedirects(response, expected_url=expected_url)
+        utils.test_cannot_access(self, self.url, expected_url)
         self.assertEqual(len(Tab.objects.all()), 1)
 
     def test_creator_in_group_can_delete_tab(self):
@@ -186,9 +162,6 @@ class DeleteTabViewTests(TestCase):
         self.client.login(username='notlogged', password='notlogged')
         expected_url = reverse('group_view', args=(self.group.pk,))
 
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.post(self.url)
-        self.assertRedirects(response, expected_url=expected_url)
+        utils.test_can_access(self, self.url,
+                              post_redirect_url=expected_url)
         self.assertEqual(len(Tab.objects.all()), 0)

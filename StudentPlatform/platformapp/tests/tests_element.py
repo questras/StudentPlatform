@@ -101,7 +101,6 @@ class CreateElementViewTests(TestCase):
                                     args=(self.group.pk, self.tab.pk, 1))
 
         utils.test_can_access(self, self.url,
-                              get_redirect_url=None,
                               post_redirect_url=post_expected_url,
                               data=self.data)
         self.assertEqual(len(Element.objects.all()), 1)
@@ -112,15 +111,11 @@ class CreateElementViewTests(TestCase):
 
         utils.create_user_and_authenticate(self)
         self.group.users.add(self.logged_user)
+        element_fields = ['name', 'text']
 
-        data1 = {'name': 'test'}
-        data2 = {'text': 'test'}
-        data_list = [data1, data2]
-
-        for data in data_list:
-            response = self.client.post(self.url, data)
-            self.assertEqual(response.status_code, 400)
-            self.assertEqual(len(Element.objects.all()), 0)
+        utils.test_cannot_post_with_empty_fields(self, self.url,
+                                                 element_fields)
+        self.assertEqual(len(Element.objects.all()), 0)
 
 
 class UpdateElementViewTests(TestCase):
@@ -179,7 +174,6 @@ class UpdateElementViewTests(TestCase):
         expected_url = reverse('element_view', args=url_args)
 
         utils.test_can_access(self, self.args['url'],
-                              get_redirect_url=None,
                               post_redirect_url=expected_url,
                               data=self.data)
         # Object is updated.
@@ -193,16 +187,14 @@ class UpdateElementViewTests(TestCase):
         or text field."""
 
         self.client.login(username='notlogged', password='notlogged')
-        data_list = [{'name': 'new'}, {'text': 'new'}]
+        element_fields = ['name', 'text']
 
-        for data in data_list:
-            response = self.client.post(self.args['url'], data)
-            self.assertEqual(response.status_code, 400)
-            # Element's fields are unchanged.
-            updated_element = Element.objects.all()[0]
-            self.assertEqual(updated_element.name, 'test')
-            self.assertEqual(updated_element.text, 'test')
-            self.assertIsNone(updated_element.last_edit_date)
+        utils.test_cannot_post_with_empty_fields(self, self.args['url'],
+                                                 element_fields)
+        updated_element = Element.objects.all()[0]
+        self.assertEqual(updated_element.name, 'test')
+        self.assertEqual(updated_element.text, 'test')
+        self.assertIsNone(updated_element.last_edit_date)
 
 
 class DeleteElementViewTests(TestCase):
@@ -250,7 +242,6 @@ class DeleteElementViewTests(TestCase):
         expected_url = reverse('group_view', args=(self.args['group'].pk,))
 
         utils.test_can_access(self, self.args['url'],
-                              get_redirect_url=None,
                               post_redirect_url=expected_url)
         # Object is deleted.
         self.assertEqual(len(Element.objects.all()), 0)
