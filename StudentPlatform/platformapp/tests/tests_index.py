@@ -25,3 +25,21 @@ class IndexViewTests(TestCase):
 
         response = self.client.get(self.url)
         self.assertRedirects(response, expected_url=reverse('feed_view'))
+
+
+class HowToViewTests(TestCase):
+    """Tests for how_to_view."""
+
+    def setUp(self) -> None:
+        self.url = reverse('how_to_view')
+
+    def test_not_logged_user_can_access(self):
+        """Test if not logged user can access."""
+
+        utils.test_can_access(self, self.url)
+
+    def test_logged_user_can_access(self):
+        """Test if logged user can access."""
+
+        utils.create_user_and_authenticate(self)
+        utils.test_can_access(self, self.url)

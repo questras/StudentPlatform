@@ -20,3 +20,9 @@ def feed_view(request):
     """TODO: Implement feed_view"""
 
     return render(request, 'platformapp/feed_view.html', {})
+
+
+def how_to_view(request):
+    """A view with how-to instructions."""
+
+    return render(request, 'platformapp/how_to_view.html', {})

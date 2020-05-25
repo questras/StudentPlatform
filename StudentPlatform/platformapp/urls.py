@@ -10,6 +10,7 @@ urlpatterns = [
     # Index views:
     path('', index_view, name='index_view'),
     path('feed/', feed_view, name='feed_view'),
+    path('howto/', how_to_view, name='how_to_view'),
     # Authentication views:
     path('auth/signup/', SignUpView.as_view(), name='signup_view'),
     path('auth/login/', LoginView.as_view(redirect_authenticated_user=True), name='login_view'),
