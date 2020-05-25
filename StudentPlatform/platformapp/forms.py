@@ -36,6 +36,9 @@ class CreateElementForm(forms.ModelForm):
     class Meta:
         model = Element
         fields = ('name', 'text', 'image',)
+        widgets = {
+            'image': forms.FileInput(),
+        }
 
 
 class RegistrationForm(UserCreationForm):
