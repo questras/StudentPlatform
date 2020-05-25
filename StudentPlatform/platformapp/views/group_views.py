@@ -1,4 +1,4 @@
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.edit import CreateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import reverse, render, get_object_or_404, redirect
@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.http import HttpResponseBadRequest
 
-from ..models import Group, Tab, Element
+from ..models import Group
 from ..forms import CreateGroupForm, UpdateGroupForm
 
 
