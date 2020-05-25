@@ -38,7 +38,7 @@
     {# Posts accordion. #}
     <div id="groupPosts">
         {# Card for every tab. #}
-        {% for tab, elements in tabs_dict.items %}
+        {% for tab in group.tab_set.all %}
             <div class="card">
                 <div class="card-header" id="heading{{ forloop.counter }}">
                     <h5 class="mb-0">
@@ -78,7 +78,7 @@
                     </div>
                 </div>
                 {# Links to posts. #}
-                {% for element in elements %}
+                {% for element in tab.element_set.all %}
                     <div
                             id="collapse{{ forloop.parentloop.counter }}{{ forloop.counter }}"
                             class="collapse multi{{ forloop.parentloop.counter }}"

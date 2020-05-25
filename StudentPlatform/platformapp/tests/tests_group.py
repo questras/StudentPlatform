@@ -192,37 +192,6 @@ class GroupViewTests(TestCase):
 
         utils.test_can_access(self, self.url)
 
-    def test_view_contains_all_tabs_and_elements_related_to_group(self):
-        """Test if view contains all tabs in the group
-        and all elements in tabs."""
-
-        utils.create_user_and_authenticate(self)
-        group1 = scripts.create_group('test1', 'test1', self.logged_user)
-        group2 = scripts.create_group('test2', 'test2', self.logged_user)
-        tab_in_group1 = scripts.create_tab('test1', self.logged_user, group1)
-        tab_in_group2 = scripts.create_tab('test2', self.logged_user, group2)
-        element_in_group1 = scripts.create_element(
-            'test1', 'test1', self.logged_user, tab_in_group1
-        )
-        element_in_group2 = scripts.create_element(
-            'test2', 'test2', self.logged_user, tab_in_group2
-        )
-
-        response = self.client.get(reverse('group_view', args=(group1.pk,)))
-        context = response.context
-
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(tab_in_group1, context['tabs_dict'].keys())
-        self.assertNotIn(tab_in_group2, context['tabs_dict'].keys())
-        self.assertIn(
-            element_in_group1,
-            context['tabs_dict'][tab_in_group1]
-        )
-        self.assertNotIn(
-            element_in_group2,
-            context['tabs_dict'][tab_in_group1]
-        )
-
 
 class GroupMembersViewTests(TestCase):
     """Tests for group_members_view."""
@@ -274,7 +243,7 @@ class GroupMembersViewTests(TestCase):
             test_users_not_in_group.append(user)
 
         response = self.client.get(self.url)
-        members = response.context['members']
+        members = response.context['group'].users.all()
 
         self.assertIn(self.logged_user, members)
 

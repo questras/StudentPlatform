@@ -117,12 +117,8 @@ def group_view(request, pk):
     if user not in group.users.all():
         return redirect(reverse('my_groups_view'))
 
-    tabs = Tab.objects.filter(group_id=group.pk)
-    tabs_dict = {tab: Element.objects.filter(tab_id=tab.pk) for tab in tabs}
-
     context = {
         'group': group,
-        'tabs_dict': tabs_dict,
     }
 
     return render(request, 'platformapp/group_view.html', context)
@@ -133,14 +129,12 @@ def group_members_view(request, pk):
     """A view with members of group."""
 
     group = get_object_or_404(Group, pk=pk)
-    members = group.users.all()
 
-    if request.user not in members:
+    if request.user not in group.users.all():
         return redirect(reverse('my_groups_view'))
 
     context = {
         'group': group,
-        'members': members,
     }
 
     return render(request, 'platformapp/group_members_view.html', context)
@@ -148,6 +142,8 @@ def group_members_view(request, pk):
 
 @login_required
 def my_groups_view(request):
+    """A view with user's groups."""
+
     groups = request.user.joined_groups.all()
     context = {
         'groups': groups,
