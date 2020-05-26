@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h1>How to start with <b>Student Platform</b></h1>
+    <ol>
+        <li>
+            <a href="{% url 'signup_view' %}">Sign up</a>
+            and
+            <a href="{% url 'login_view' %}">Log in</a>
+        </li>
+        <li>
+            <a href="{% url 'search_groups_view' %}">Search</a>
+            for groups or
+            <a href="{% url 'create_group_view' %}">create one</a>
+        </li>
+        <li>
+            Open
+            <a href="{% url 'my_groups_view' %}">your groups</a>
+            and share your knowledge with others using
+            <i>tabs</i> and <i>posts</i>!
+        </li>
+    </ol>
+
+{% endblock %}

@@ -2,6 +2,22 @@ body{
     margin-top:20px;
 }
 
+#group_name {
+    color: dimgrey;
+    font-size: 1.5rem;
+}
+
+#edit_group{
+    color: lightgrey;
+}
+
+#create_tab{
+    color: dimgrey;
+    font-size: 1.25rem
+}
+
+/* Comments */
+
 .comment-wrapper .panel-body {
     max-height:650px;
     overflow:auto;
@@ -16,18 +32,4 @@ body{
 .comment-wrapper .media-list .media {
     border-bottom:1px dashed #efefef;
     margin-bottom:25px;
-}
-
-#group_name {
-    color: dimgrey;
-    font-size: 1.5rem;
-}
-
-#edit_group{
-    color: lightgrey;
-}
-
-#create_tab{
-    color: dimgrey;
-    font-size: 1.25rem
 }

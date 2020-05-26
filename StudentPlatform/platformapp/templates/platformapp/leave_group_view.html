@@ -4,10 +4,10 @@
     <h2>{{ group.name }}</h2>
     <h3>Description: {{ group.description }}</h3>
     <h4>Creator: {{ group.creator.username }}</h4>
-    <h5>Would you like to join this group?</h5>
-    <form action="{% url 'join_group_view' group.pk %}" method="post">
+    <h5>Are you sure to leave this group?</h5>
+    <form action="{% url 'leave_group_view' group.pk %}" method="post">
         {% csrf_token %}
-        <button type="submit" class="btn btn-success">Join</button>
+        <button type="submit" class="btn btn-success">Leave</button>
     </form>
     <a href="{% url 'my_groups_view' %}"><button class="btn btn-danger">Cancel</button></a>
 {% endblock %}
