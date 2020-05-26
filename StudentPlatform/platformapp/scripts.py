@@ -5,7 +5,7 @@ import random
 import requests
 import json
 
-from .models import Group, Tab, Element
+from .models import Group, Tab, Element, Comment
 
 User = get_user_model()
 
@@ -153,3 +153,14 @@ def create_element(name: str, text: str, user: User, tab: Tab) -> Element:
     element.save()
 
     return element
+
+
+def create_comment(text: str, user: User, element: Element) -> Comment:
+    comment = Comment.objects.create(
+        text=text,
+        creator=user,
+        element=element,
+    )
+    comment.save()
+
+    return comment

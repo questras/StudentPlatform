@@ -31,6 +31,24 @@ def add_comment_view(request, g_pk, t_pk, e_pk):
     return redirect(element_view_url)
 
 
+@login_required
 def delete_comment_view(request, g_pk, t_pk, e_pk, pk):
     """A view for deleting existing comments."""
-    pass
+
+    group = get_object_or_404(Group, pk=g_pk)
+    comment = get_object_or_404(Comment, pk=pk)
+    user = request.user
+    element_view_url = reverse('element_view',
+                               args=(g_pk, t_pk, e_pk,))
+
+    if user not in group.users.all():
+        return redirect(reverse('my_groups_view'))
+
+    if user.id != comment.creator.id:
+        return redirect(element_view_url)
+
+    if request.method == 'POST':
+        comment.delete()
+        return redirect(element_view_url)
+
+    return render(request, 'platformapp/delete_comment_view.html')

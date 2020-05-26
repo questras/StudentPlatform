@@ -36,6 +36,7 @@
         <p><img style="max-width: 100%;" src="{{ element.image.url }}"></p>
     {% endif %}
 
+    {# Comments section #}
     <div class="row bootstrap snippets">
         <div class="col-md-6 col-md-offset-2 col-sm-12">
             <div class="comment-wrapper">
@@ -64,6 +65,11 @@
                                         <span class="text-muted pull-right">
                                             <small class="text-muted">{{ comment.created_date }}</small>
                                         </span>
+                                        {% if request.user.id == comment.creator.id %}
+                                            <a href="{% url 'delete_comment_view' element.tab.group.pk element.tab.pk element.pk comment.pk %}">
+                                                <button class="btn btn-danger">Delete</button>
+                                            </a>
+                                        {% endif %}
                                         <p>
                                             {{ comment.text }}
                                         </p>
