@@ -80,6 +80,21 @@ class Element(models.Model):
     last_edit_date = models.DateTimeField(null=True)
 
     def __str__(self):
-        return f'Group: "{self.tab.group.name}" -> Tab: "{self.tab.name}" -> '\
-               f'Element: "{self.name}" created by "{self.creator.username}" '\
+        return f'Group: "{self.tab.group.name}" -> Tab: "{self.tab.name}" -> ' \
+               f'Element: "{self.name}" created by "{self.creator.username}" ' \
                f'at {self.created_date}'
+
+
+class Comment(models.Model):
+    """Comment model.
+
+    Fields:
+        text:           text content of the comment,
+        creator:        user that created the comment,
+        element:        element that the comment belongs to,
+        created_date:   date when comment was created.
+    """
+    text = models.TextField()
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    element = models.ForeignKey(Element, on_delete=models.CASCADE)
+    created_date = models.DateTimeField(auto_now_add=True)

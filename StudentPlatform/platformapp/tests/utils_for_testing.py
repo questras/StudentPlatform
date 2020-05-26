@@ -60,6 +60,7 @@ def test_cannot_access(test_case: TestCase, url: str,
 
 def test_can_access(test_case: TestCase,
                     url: str,
+                    get_redirect_url: str = None,
                     post_redirect_url: str = None,
                     data: dict = None):
     """Check if test_case can access url with
@@ -67,7 +68,10 @@ def test_can_access(test_case: TestCase,
     is redirected to expected url, if specified."""
 
     response = test_case.client.get(url)
-    test_case.assertEqual(response.status_code, 200)
+    if get_redirect_url:
+        test_case.assertRedirects(response, expected_url=get_redirect_url)
+    else:
+        test_case.assertEqual(response.status_code, 200)
 
     response = test_case.client.post(url, data)
     if post_redirect_url:

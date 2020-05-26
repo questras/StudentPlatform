@@ -132,6 +132,7 @@ def element_view(request, g_pk, t_pk, pk):
     group = get_object_or_404(Group, pk=g_pk)
     tab = get_object_or_404(Tab, pk=t_pk)
     element = get_object_or_404(Element, pk=pk)
+    comments = element.comment_set.all().order_by('-created_date')
 
     if request.user not in group.users.all():
         return redirect(reverse('my_groups_view'))
@@ -140,6 +141,7 @@ def element_view(request, g_pk, t_pk, pk):
         'group': group,
         'tab': tab,
         'element': element,
+        'comments': comments,
     }
 
     return render(request, 'platformapp/element_view.html', context)

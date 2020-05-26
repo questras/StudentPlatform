@@ -36,4 +36,46 @@
         <p><img style="max-width: 100%;" src="{{ element.image.url }}"></p>
     {% endif %}
 
+    <div class="row bootstrap snippets">
+        <div class="col-md-6 col-md-offset-2 col-sm-12">
+            <div class="comment-wrapper">
+                <div class="panel panel-info">
+                    <h2>Comments</h2>
+                    <div class="panel-body">
+                        <textarea class="form-control" name="text" id="text" placeholder="write a comment..."
+                                  rows="3" form="comment_form"></textarea>
+                        <br>
+
+                        <form method="post" id="comment_form"
+                              action="{% url 'add_comment_view' element.tab.group.pk element.tab.pk element.pk %}"
+                        >
+                            {% csrf_token %}
+                            <input type="submit" class="btn btn-info pull-right" value="Add">
+                        </form>
+
+                        <div class="clearfix"></div>
+                        <hr>
+
+                        <ul class="media-list">
+                            {% for comment in comments %}
+                                <li class="media">
+                                    <div class="media-body">
+                                        <strong class="text-success">{{ comment.creator.username }}</strong>
+                                        <span class="text-muted pull-right">
+                                            <small class="text-muted">{{ comment.created_date }}</small>
+                                        </span>
+                                        <p>
+                                            {{ comment.text }}
+                                        </p>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
