@@ -32,11 +32,9 @@ urlpatterns = [
     path('tab/<int:pk>/delete/', delete_tab_view, name='delete_tab_view'),
     # Element views:
     path('tab/<int:t_pk>/create_element/', create_element_view, name='create_element_view'),
-    path('group/<int:g_pk>/tab/<int:t_pk>/element/<int:pk>/', element_view, name='element_view'),
-    path('group/<int:g_pk>/tab/<int:t_pk>/element/<int:pk>/update', update_element_view,
-         name='update_element_view'),
-    path('group/<int:g_pk>/tab/<int:t_pk>/element/<int:pk>/delete', delete_element_view,
-         name='delete_element_view'),
+    path('element/<int:pk>/', element_view, name='element_view'),
+    path('element/<int:pk>/update', update_element_view, name='update_element_view'),
+    path('element/<int:pk>/delete', delete_element_view, name='delete_element_view'),
     # Comment views:
     path('group/<int:g_pk>/tab/<int:t_pk>/element/<int:e_pk>/add_comment/', add_comment_view, name='add_comment_view'),
     path('group/<int:g_pk>/tab/<int:t_pk>/element/<int:e_pk>/comment/<int:pk>/delete', delete_comment_view,

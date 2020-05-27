@@ -28,10 +28,7 @@ def element_test_setup(view_name):
         user=args['not_logged_user'],
         tab=args['tab']
     )
-    args['url'] = reverse(
-        view_name,
-        args=(args['group'].pk, args['tab'].pk, args['element'].pk,)
-    )
+    args['url'] = reverse(view_name, args=(args['element'].pk,))
 
     return args
 
@@ -96,8 +93,7 @@ class CreateElementViewTests(TestCase):
         utils.create_user_and_authenticate(self)
         self.group.users.add(self.logged_user)
         # 1 is id of created element in the future.
-        post_expected_url = reverse('element_view',
-                                    args=(self.group.pk, self.tab.pk, 1))
+        post_expected_url = reverse('element_view', args=(1,))
 
         utils.test_can_access(self, self.url,
                               post_redirect_url=post_expected_url,
@@ -147,10 +143,7 @@ class UpdateElementViewTests(TestCase):
 
         utils.create_user_and_authenticate(self)
         self.args['group'].users.add(self.logged_user)
-        url_args = (
-            self.args['group'].pk, self.args['tab'].pk, self.args['element'].pk,
-        )
-        expected_url = reverse('element_view', args=url_args)
+        expected_url = reverse('element_view', args=(self.args['element'].pk,))
 
         utils.test_cannot_access(self, self.args['url'],
                                  expected_url=expected_url,
@@ -167,10 +160,7 @@ class UpdateElementViewTests(TestCase):
         update the element."""
 
         self.client.login(username='notlogged', password='notlogged')
-        url_args = (
-            self.args['group'].pk, self.args['tab'].pk, self.args['element'].pk,
-        )
-        expected_url = reverse('element_view', args=url_args)
+        expected_url = reverse('element_view', args=(self.args['element'].pk,))
 
         utils.test_can_access(self, self.args['url'],
                               post_redirect_url=expected_url,
@@ -222,10 +212,7 @@ class DeleteElementViewTests(TestCase):
 
         utils.create_user_and_authenticate(self)
         self.args['group'].users.add(self.logged_user)
-        url_args = (
-            self.args['group'].pk, self.args['tab'].pk, self.args['element'].pk,
-        )
-        expected_url = reverse('element_view', args=url_args)
+        expected_url = reverse('element_view', args=(self.args['element'].pk,))
 
         utils.test_cannot_access(self, self.args['url'],
                                  expected_url=expected_url)

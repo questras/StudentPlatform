@@ -12,7 +12,6 @@ def add_comment_view(request, g_pk, t_pk, e_pk):
 
     group = get_object_or_404(Group, pk=g_pk)
     element = get_object_or_404(Element, pk=e_pk)
-    element_view_url = reverse('element_view', args=(g_pk, t_pk, e_pk,))
 
     if request.user not in group.users.all():
         return redirect(reverse('my_groups_view'))
@@ -28,7 +27,7 @@ def add_comment_view(request, g_pk, t_pk, e_pk):
         else:
             return HttpResponseBadRequest()
 
-    return redirect(element_view_url)
+    return redirect(reverse('element_view', args=(e_pk,)))
 
 
 @login_required
@@ -38,8 +37,7 @@ def delete_comment_view(request, g_pk, t_pk, e_pk, pk):
     group = get_object_or_404(Group, pk=g_pk)
     comment = get_object_or_404(Comment, pk=pk)
     user = request.user
-    element_view_url = reverse('element_view',
-                               args=(g_pk, t_pk, e_pk,))
+    element_view_url = reverse('element_view', args=(e_pk,))
 
     if user not in group.users.all():
         return redirect(reverse('my_groups_view'))

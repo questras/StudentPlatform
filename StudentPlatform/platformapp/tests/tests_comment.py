@@ -42,8 +42,7 @@ class AddCommentViewTests(TestCase):
 
         utils.create_user_and_authenticate(self)
         self.group.users.add(self.logged_user)
-        url_args = (self.group.pk, self.tab.pk, self.element.pk,)
-        expected_url = reverse('element_view', args=url_args)
+        expected_url = reverse('element_view', args=(self.element.pk,))
 
         utils.test_can_access(self, self.url,
                               get_redirect_url=expected_url,
@@ -95,8 +94,7 @@ class DeleteCommentViewTests(TestCase):
 
         utils.create_user_and_authenticate(self)
         self.group.users.add(self.logged_user)
-        url_args = (self.group.pk, self.tab.pk, self.element.pk,)
-        expected_url = reverse('element_view', args=url_args)
+        expected_url = reverse('element_view', args=(self.element.pk,))
 
         utils.test_cannot_access(self, self.url, expected_url)
 
@@ -104,8 +102,7 @@ class DeleteCommentViewTests(TestCase):
         """Test if creator of the comment can delete it."""
 
         self.client.login(username='notlogged', password='notlogged')
-        url_args = (self.group.pk, self.tab.pk, self.element.pk,)
-        expected_url = reverse('element_view', args=url_args)
+        expected_url = reverse('element_view', args=(self.element.pk,))
 
         self.assertEqual(len(Comment.objects.all()), 1)
         utils.test_can_access(self, self.url, post_redirect_url=expected_url)

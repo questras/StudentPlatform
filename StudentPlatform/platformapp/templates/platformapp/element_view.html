@@ -8,10 +8,10 @@
     </a>
 
     {% if request.user.id == element.creator.id %}
-        <a href="{% url 'delete_element_view' group.pk tab.pk element.pk %}">
+        <a href="{% url 'delete_element_view' element.pk %}">
             <button class="btn btn-danger">Delete post</button>
         </a>
-        <a href="{% url 'update_element_view' group.pk tab.pk element.pk %}">
+        <a href="{% url 'update_element_view' element.pk %}">
             <button class="btn btn-warning">Edit post</button>
         </a>
     {% endif %}

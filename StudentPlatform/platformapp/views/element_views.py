@@ -57,8 +57,7 @@ def create_element_view(request, t_pk):
         if form.is_valid():
             element = create_element(form, request.user, tab)
             element.save()
-            return redirect(reverse('element_view',
-                                    args=(group.pk, tab.pk, element.pk)))
+            return redirect(reverse('element_view', args=(element.pk,)))
         else:
             return HttpResponseBadRequest()
 
@@ -71,15 +70,14 @@ def create_element_view(request, t_pk):
 
 
 @login_required
-def update_element_view(request, g_pk, t_pk, pk):
+def update_element_view(request, pk):
     """A view for updating existing elements."""
 
-    group = get_object_or_404(Group, pk=g_pk)
-    tab = get_object_or_404(Tab, pk=t_pk)
     element = get_object_or_404(Element, pk=pk)
+    tab = element.tab
+    group = tab.group
     user = request.user
-    element_view_url = reverse('element_view',
-                               args=(group.pk, tab.pk, element.pk,))
+    element_view_url = reverse('element_view', args=(element.pk,))
 
     if user not in group.users.all():
         return redirect(reverse('my_groups_view'))
@@ -104,19 +102,18 @@ def update_element_view(request, g_pk, t_pk, pk):
 
 
 @login_required
-def delete_element_view(request, g_pk, t_pk, pk):
+def delete_element_view(request, pk):
     """A view for deleting existing elements."""
 
-    group = get_object_or_404(Group, pk=g_pk)
-    tab = get_object_or_404(Tab, pk=t_pk)
     element = get_object_or_404(Element, pk=pk)
+    tab = element.tab
+    group = tab.group
     user = request.user
 
     if user not in group.users.all():
         return redirect(reverse('my_groups_view'))
     elif user.id != element.creator.id:
-        return redirect(reverse('element_view',
-                                args=(group.pk, tab.pk, element.pk,)))
+        return redirect(reverse('element_view', args=(element.pk,)))
 
     if request.method == 'POST':
         element.delete()
@@ -126,12 +123,12 @@ def delete_element_view(request, g_pk, t_pk, pk):
 
 
 @login_required
-def element_view(request, g_pk, t_pk, pk):
+def element_view(request, pk):
     """Main view of an element."""
 
-    group = get_object_or_404(Group, pk=g_pk)
-    tab = get_object_or_404(Tab, pk=t_pk)
     element = get_object_or_404(Element, pk=pk)
+    tab = element.tab
+    group = tab.group
     comments = element.comment_set.all().order_by('-created_date')
 
     if request.user not in group.users.all():
