@@ -131,7 +131,7 @@ class DeleteTabViewTests(TestCase):
         self.tab_creator = utils.create_user('tab', 'tab')
         self.group.users.add(self.tab_creator)
         self.tab = scripts.create_tab('test', self.tab_creator, self.group)
-        self.url = reverse('delete_tab_view', args=(self.group.pk, self.tab.pk))
+        self.url = reverse('delete_tab_view', args=(self.tab.pk,))
 
     def test_not_logged_cannot_delete_tab(self):
         """Test if not logged user cannot update the tab."""
