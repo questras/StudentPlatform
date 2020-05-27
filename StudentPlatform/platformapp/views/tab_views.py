@@ -39,11 +39,11 @@ def create_tab_view(request, g_pk):
 
 
 @login_required
-def update_tab_view(request, g_pk, pk):
+def update_tab_view(request, pk):
     """A view for updating tabs."""
 
-    group = get_object_or_404(Group, pk=g_pk)
     tab = get_object_or_404(Tab, pk=pk)
+    group = tab.group
     user = request.user
 
     if user not in group.users.all():

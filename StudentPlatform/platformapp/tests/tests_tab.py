@@ -66,7 +66,7 @@ class UpdateTabViewTests(TestCase):
         self.tab_creator = utils.create_user('tab', 'tab')
         self.group.users.add(self.tab_creator)
         self.tab = scripts.create_tab('test', self.tab_creator, self.group)
-        self.url = reverse('update_tab_view', args=(self.group.pk, self.tab.pk))
+        self.url = reverse('update_tab_view', args=(self.tab.pk,))
         self.data = {
             'name': 'new',
         }

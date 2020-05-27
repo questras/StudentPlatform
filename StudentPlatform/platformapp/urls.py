@@ -28,7 +28,7 @@ urlpatterns = [
     path('search_groups', search_groups_view, name='search_groups_view'),
     # Tab views:
     path('group/<int:g_pk>/create_tab/', create_tab_view, name='create_tab_view'),
-    path('group/<int:g_pk>/tab/<int:pk>/update/', update_tab_view, name='update_tab_view'),
+    path('tab/<int:pk>/update/', update_tab_view, name='update_tab_view'),
     path('group/<int:g_pk>/tab/<int:pk>/delete/', delete_tab_view, name='delete_tab_view'),
     # Element views:
     path('group/<int:g_pk>/tab/<int:t_pk>/create_element/', create_element_view, name='create_element_view'),

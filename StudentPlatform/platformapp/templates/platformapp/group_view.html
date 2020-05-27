@@ -54,7 +54,7 @@
 
                         {# Edit and delete link for tab's creator. #}
                         {% if tab.creator.id == request.user.id %}
-                            <a href="{% url 'update_tab_view' group.pk tab.pk %}">
+                            <a href="{% url 'update_tab_view' tab.pk %}">
                                 --edit--
                             </a>
                             <a href="{% url 'delete_tab_view' group.pk tab.pk %}">
