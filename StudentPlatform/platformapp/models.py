@@ -33,7 +33,7 @@ class Group(models.Model):
     def __str__(self):
         return f'{self.pk}. Group "{self.name}" ' \
                f'created by "{self.creator.username}" ' \
-               f'at {self.created_date}.'
+               f'on {self.created_date.ctime()}.'
 
 
 class Tab(models.Model):
@@ -55,7 +55,8 @@ class Tab(models.Model):
 
     def __str__(self):
         return f'Group: "{self.group.name}" -> Tab: "{self.name}" ' \
-               f'created by "{self.creator.username}" at {self.created_date}'
+               f'created by "{self.creator.username}" ' \
+               f'on {self.created_date.ctime()}'
 
 
 class Element(models.Model):
@@ -82,7 +83,7 @@ class Element(models.Model):
     def __str__(self):
         return f'Group: "{self.tab.group.name}" -> Tab: "{self.tab.name}" -> ' \
                f'Element: "{self.name}" created by "{self.creator.username}" ' \
-               f'at {self.created_date}'
+               f'on {self.created_date.ctime()}'
 
 
 class Comment(models.Model):
@@ -98,3 +99,10 @@ class Comment(models.Model):
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     element = models.ForeignKey(Element, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Group: "{self.element.tab.group.name}" ->' \
+               f'Tab: "{self.element.tab.name}" -> ' \
+               f'Element: "{self.element.name}" -> ' \
+               f'Comment created by ' \
+               f'"{self.creator.username}" on {self.created_date.ctime()}'
