@@ -71,8 +71,7 @@ class CreateElementViewTests(TestCase):
         self.not_logged_user = utils.create_user('notlogged', 'notlogged')
         self.group = scripts.create_group('test', 'test', self.not_logged_user)
         self.tab = scripts.create_tab('test', self.not_logged_user, self.group)
-        self.url = reverse('create_element_view',
-                           args=(self.group.pk, self.tab.pk,))
+        self.url = reverse('create_element_view', args=(self.tab.pk,))
         self.data = {
             'name': 'test',
             'text': 'test',

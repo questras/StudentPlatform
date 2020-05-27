@@ -43,11 +43,11 @@ def update_element(element: Element, form: CreateElementForm) -> Element:
 
 
 @login_required
-def create_element_view(request, g_pk, t_pk):
+def create_element_view(request, t_pk):
     """A view for creating new elements."""
 
-    group = get_object_or_404(Group, pk=g_pk)
     tab = get_object_or_404(Tab, pk=t_pk)
+    group = tab.group
 
     if request.user not in group.users.all():
         return redirect(reverse('my_groups_view'))
