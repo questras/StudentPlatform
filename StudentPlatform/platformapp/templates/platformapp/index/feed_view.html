@@ -1,5 +1,37 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-
+    {% for entry, type in entries %}
+        <div class="feed-post">
+            <p><i>{{ entry.created_date }}</i></p>
+            <p>
+                <b>{{ entry.creator.username }}</b> added
+                {% if type == 'Tab' %}
+                    new Tab <b>{{ entry.name }}</b> in Group
+                    <a href="{% url 'group_view' entry.group.pk %}">
+                        <b>{{ entry.group.name }}</b>
+                    </a>
+                {% elif type == 'Element' %}
+                    new Post
+                    <a href="{% url 'element_view' entry.pk %}">
+                        <b>{{ entry.name }}</b>
+                    </a>
+                    in Tab <b>{{ entry.tab.name }}</b> in Group
+                    <a href="{% url 'group_view' entry.tab.group.pk %}">
+                        <b>{{ entry.tab.group.name }}</b>
+                    </a>
+                {% elif type == 'Comment' %}
+                    new Comment in Post
+                    <a href="{% url 'element_view' entry.element.pk %}">
+                        <b>{{ entry.element.name }}</b>
+                    </a>
+                    in Tab <b>{{ entry.element.tab.name }}</b> in Group
+                    <a href="{% url 'group_view' entry.element.tab.group.pk %}">
+                        <b>{{ entry.element.tab.group.name }}</b>
+                    </a>
+                {% endif %}
+            </p>
+        </div>
+    {% endfor %}
 {% endblock %}

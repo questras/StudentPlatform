@@ -33,3 +33,12 @@ body{
     border-bottom:1px dashed #efefef;
     margin-bottom:25px;
 }
+
+/* Feed post */
+.feed-post {
+    width: 100%;
+    margin: 5%;
+    padding: 3%;
+    background-color: #dddddd;
+    border-radius: 8px;
+}

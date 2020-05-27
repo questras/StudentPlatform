@@ -164,3 +164,33 @@ def create_comment(text: str, user: User, element: Element) -> Comment:
     comment.save()
 
     return comment
+
+
+def get_all_tabs_from_groups(groups: List[Group]) -> List[Tab]:
+    """Return list of all tabs in groups."""
+
+    tabs = []
+    for group in groups:
+        tabs += list(group.tab_set.all())
+
+    return tabs
+
+
+def get_all_elements_from_tabs(tabs: List[Tab]) -> List[Element]:
+    """Return list of all elements in tabs."""
+
+    elements = []
+    for tab in tabs:
+        elements += list(tab.element_set.all())
+
+    return elements
+
+
+def get_all_comments_from_elements(elements: List[Element]) -> List[Comment]:
+    """Return list of all comments in elements."""
+
+    comments = []
+    for element in elements:
+        comments += list(element.comment_set.all())
+
+    return comments
