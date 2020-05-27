@@ -48,7 +48,7 @@
                         <br>
 
                         <form method="post" id="comment_form"
-                              action="{% url 'add_comment_view' element.tab.group.pk element.tab.pk element.pk %}"
+                              action="{% url 'add_comment_view' element.pk %}"
                         >
                             {% csrf_token %}
                             <input type="submit" class="btn btn-info pull-right" value="Add">
@@ -66,7 +66,7 @@
                                             <small class="text-muted">{{ comment.created_date }}</small>
                                         </span>
                                         {% if request.user.id == comment.creator.id %}
-                                            <a href="{% url 'delete_comment_view' element.tab.group.pk element.tab.pk element.pk comment.pk %}">
+                                            <a href="{% url 'delete_comment_view' comment.pk %}">
                                                 <button class="btn btn-danger">Delete</button>
                                             </a>
                                         {% endif %}

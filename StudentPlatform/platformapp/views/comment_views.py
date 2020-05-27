@@ -6,12 +6,12 @@ from ..models import Group, Element, Comment
 
 
 @login_required
-def add_comment_view(request, g_pk, t_pk, e_pk):
+def add_comment_view(request, e_pk):
     """A view for creating new comments. Accepts only
     post requests."""
 
-    group = get_object_or_404(Group, pk=g_pk)
     element = get_object_or_404(Element, pk=e_pk)
+    group = element.tab.group
 
     if request.user not in group.users.all():
         return redirect(reverse('my_groups_view'))
@@ -31,13 +31,13 @@ def add_comment_view(request, g_pk, t_pk, e_pk):
 
 
 @login_required
-def delete_comment_view(request, g_pk, t_pk, e_pk, pk):
+def delete_comment_view(request, pk):
     """A view for deleting existing comments."""
 
-    group = get_object_or_404(Group, pk=g_pk)
     comment = get_object_or_404(Comment, pk=pk)
+    group = comment.element.tab.group
     user = request.user
-    element_view_url = reverse('element_view', args=(e_pk,))
+    element_view_url = reverse('element_view', args=(comment.element.pk,))
 
     if user not in group.users.all():
         return redirect(reverse('my_groups_view'))

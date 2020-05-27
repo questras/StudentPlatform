@@ -15,8 +15,7 @@ class AddCommentViewTests(TestCase):
         self.tab = scripts.create_tab('test', self.not_logged_user, self.group)
         self.element = scripts.create_element('test', 'test',
                                               self.not_logged_user, self.tab)
-        url_args = (self.group.pk, self.tab.pk, self.element.pk,)
-        self.url = reverse('add_comment_view', args=url_args)
+        self.url = reverse('add_comment_view', args=(self.element.pk,))
         self.data = {
             'text': 'test',
         }
@@ -71,8 +70,7 @@ class DeleteCommentViewTests(TestCase):
                                               self.not_logged_user, self.tab)
         self.comment = scripts.create_comment('test', self.not_logged_user,
                                               self.element)
-        url_args = (self.group.pk, self.tab.pk, self.element.pk, self.comment.pk)
-        self.url = reverse('delete_comment_view', args=url_args)
+        self.url = reverse('delete_comment_view', args=(self.comment.pk,))
 
     def test_not_logged_cannot_delete_comment(self):
         """Test if not logged user cannot delete comment."""
