@@ -66,7 +66,7 @@ def create_element_view(request, t_pk):
         'form': form,
     }
 
-    return render(request, 'platformapp/create_element_view.html', context)
+    return render(request, 'platformapp/element/create_element_view.html', context)
 
 
 @login_required
@@ -98,7 +98,7 @@ def update_element_view(request, pk):
         'form': form,
     }
 
-    return render(request, 'platformapp/update_element_view.html', context)
+    return render(request, 'platformapp/element/update_element_view.html', context)
 
 
 @login_required
@@ -119,7 +119,7 @@ def delete_element_view(request, pk):
         element.delete()
         return redirect(reverse('group_view', args=(group.pk,)))
 
-    return render(request, 'platformapp/delete_element_view.html')
+    return render(request, 'platformapp/element/delete_element_view.html')
 
 
 @login_required
@@ -141,4 +141,4 @@ def element_view(request, pk):
         'comments': comments,
     }
 
-    return render(request, 'platformapp/element_view.html', context)
+    return render(request, 'platformapp/element/element_view.html', context)

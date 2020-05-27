@@ -49,4 +49,4 @@ def delete_comment_view(request, pk):
         comment.delete()
         return redirect(element_view_url)
 
-    return render(request, 'platformapp/delete_comment_view.html')
+    return render(request, 'platformapp/comment/delete_comment_view.html')

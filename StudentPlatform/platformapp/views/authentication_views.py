@@ -14,7 +14,7 @@ class SignUpView(CreateView):
 
     form_class = RegistrationForm
     success_url = reverse_lazy('login_view')
-    template_name = 'platformapp/signup_view.html'
+    template_name = 'platformapp/authentication/signup_view.html'
 
     def get(self, request, *args, **kwargs):
         """Redirect to index if logged user tries to sign up."""

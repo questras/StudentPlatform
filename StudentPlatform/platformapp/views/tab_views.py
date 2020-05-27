@@ -35,7 +35,7 @@ def create_tab_view(request, g_pk):
         'form': form,
     }
 
-    return render(request, 'platformapp/create_tab_view.html', context)
+    return render(request, 'platformapp/tab/create_tab_view.html', context)
 
 
 @login_required
@@ -66,7 +66,7 @@ def update_tab_view(request, pk):
         'form': form,
     }
 
-    return render(request, 'platformapp/update_tab_view.html', context)
+    return render(request, 'platformapp/tab/update_tab_view.html', context)
 
 
 @login_required
@@ -86,4 +86,4 @@ def delete_tab_view(request, pk):
         tab.delete()
         return redirect(reverse('group_view', args=(group.pk,)))
 
-    return render(request, 'platformapp/delete_tab_view.html', {})
+    return render(request, 'platformapp/tab/delete_tab_view.html', {})

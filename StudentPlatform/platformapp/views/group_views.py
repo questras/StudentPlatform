@@ -19,7 +19,7 @@ class CreateGroupView(LoginRequiredMixin, CreateView):
 
     model = Group
     form_class = CreateGroupForm
-    template_name = 'platformapp/create_group_view.html'
+    template_name = 'platformapp/group/create_group_view.html'
     success_url = reverse_lazy('my_groups_view')
 
     def form_valid(self, form):
@@ -69,7 +69,7 @@ def update_group_view(request, pk):
         'form': form,
     }
 
-    return render(request, 'platformapp/update_group_view.html', context)
+    return render(request, 'platformapp/group/update_group_view.html', context)
 
 
 class DeleteGroupView(LoginRequiredMixin, DeleteView):
@@ -80,7 +80,7 @@ class DeleteGroupView(LoginRequiredMixin, DeleteView):
 
     model = Group
     success_url = reverse_lazy('my_groups_view')
-    template_name = 'platformapp/delete_group_view.html'
+    template_name = 'platformapp/group/delete_group_view.html'
 
     def get(self, request, *args, **kwargs):
         """Redirect if request user is not in group or
@@ -121,7 +121,7 @@ def group_view(request, pk):
         'group': group,
     }
 
-    return render(request, 'platformapp/group_view.html', context)
+    return render(request, 'platformapp/group/group_view.html', context)
 
 
 @login_required
@@ -137,7 +137,7 @@ def group_members_view(request, pk):
         'group': group,
     }
 
-    return render(request, 'platformapp/group_members_view.html', context)
+    return render(request, 'platformapp/group/group_members_view.html', context)
 
 
 @login_required
@@ -149,7 +149,7 @@ def my_groups_view(request):
         'groups': groups,
     }
 
-    return render(request, 'platformapp/my_groups_view.html', context)
+    return render(request, 'platformapp/group/my_groups_view.html', context)
 
 
 @login_required
@@ -169,7 +169,7 @@ def join_group_view(request, pk):
         'group': group,
     }
 
-    return render(request, 'platformapp/join_group_view.html', context)
+    return render(request, 'platformapp/group/join_group_view.html', context)
 
 
 @login_required
@@ -190,7 +190,7 @@ def search_groups_view(request):
             )
             context['search_result'] = search_result
 
-    return render(request, 'platformapp/search_groups_view.html', context)
+    return render(request, 'platformapp/group/search_groups_view.html', context)
 
 
 @login_required
@@ -209,4 +209,4 @@ def leave_group_view(request, pk):
         'group': group,
     }
 
-    return render(request, 'platformapp/leave_group_view.html', context)
+    return render(request, 'platformapp/group/leave_group_view.html', context)
