@@ -22,9 +22,9 @@ urlpatterns = [
     path('group/<int:pk>/update/', update_group_view, name='update_group_view'),
     path('group/<int:pk>/delete/', DeleteGroupView.as_view(), name='delete_group_view'),
     path('group/<int:pk>/leave/', leave_group_view, name='leave_group_view'),
+    path('group/<int:pk>/join/', join_group_view, name='join_group_view'),
     path('create_group/', CreateGroupView.as_view(), name='create_group_view'),
     path('my_groups/', my_groups_view, name='my_groups_view'),
-    path('join_group/<int:pk>/', join_group_view, name='join_group_view'),
     path('search_groups', search_groups_view, name='search_groups_view'),
     # Tab views:
     path('group/<int:g_pk>/create_tab/', create_tab_view, name='create_tab_view'),
