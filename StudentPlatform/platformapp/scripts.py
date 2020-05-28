@@ -21,23 +21,27 @@ def get_random_words() -> List[str]:
     return words
 
 
-def create_random_data(users: int, groups: int, tabs: int, elements: int):
+def create_random_data(users: int, groups: int, tabs: int,
+                       elements: int, comments: int):
     """Add randomly generated data to database. Create users, groups,
     tabs and elements in number specified in parameters.
 
     :param users:       number of users to add, positive number,
     :param groups:      number of groups to add, positive number,
     :param tabs:        number of tabs to add, positive number,
-    :param elements:    number of elements to add, positive number.
+    :param elements:    number of elements to add, positive number,
+    :param comments:    number of comments to add, positive number.
     """
 
-    if users <= 0 or groups <= 0 or tabs <= 0 or elements <= 0:
+    if users <= 0 or groups <= 0 or tabs <= 0 or elements <= 0 or comments <= 0:
         raise ValueError
 
     words = get_random_words()
     users_list = []
     groups_list = []
     tabs_list = []
+    elements_list = []
+
     for i in range(users):
         user = create_random_user(words)
         print(f'Created: {user}')
@@ -56,6 +60,25 @@ def create_random_data(users: int, groups: int, tabs: int, elements: int):
     for i in range(elements):
         element = create_random_element(words, tabs_list, users_list)
         print(f'Created: {element}')
+        elements_list.append(element)
+
+    for i in range(comments):
+        comment = create_random_comment(words, elements_list, users_list)
+        print(f'Created: {comment}')
+
+
+def create_random_comment(words: List[str], elements: List[Element],
+                          creators: List[User]) -> Comment:
+    """Create comment with text set as random
+    english word from words. Comment's element and user are
+    chosen from elements and creators.
+    """
+
+    text = random.choice(words)
+    user = random.choice(creators)
+    element = random.choice(elements)
+
+    return create_comment(text, user, element)
 
 
 def create_random_element(words: List[str], tabs: List[Tab],
