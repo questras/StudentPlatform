@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'platformapp.apps.PlatformappConfig',
+    'django.contrib.postgres',
     'crispy_forms',
     'django_cleanup.apps.CleanupConfig',
 ]
