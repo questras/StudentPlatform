@@ -42,69 +42,74 @@ def create_random_data(users: int, groups: int, tabs: int,
     tabs_list = []
     elements_list = []
 
+    # Create users.
     for i in range(users):
         user = create_random_user(words)
-        print(f'Created: {user}')
         users_list.append(user)
 
+    # Create groups.
     for i in range(groups):
         group = create_random_group(words, users_list)
-        print(f'Created: {group}')
         groups_list.append(group)
 
+    # Add random amount of created users to each group.
+    for group in groups_list:
+        for user in users_list:
+            if random.choice([True, False]):
+                group.users.add(user)
+
+    # Create tabs.
     for i in range(tabs):
-        tab = create_random_tab(words, groups_list, users_list)
-        print(f'Created: {tab}')
+        tab = create_random_tab(words, groups_list)
         tabs_list.append(tab)
 
+    # Create elements.
     for i in range(elements):
-        element = create_random_element(words, tabs_list, users_list)
-        print(f'Created: {element}')
+        element = create_random_element(words, tabs_list)
         elements_list.append(element)
 
+    # Create comments.
     for i in range(comments):
-        comment = create_random_comment(words, elements_list, users_list)
-        print(f'Created: {comment}')
+        comment = create_random_comment(words, elements_list)
 
 
-def create_random_comment(words: List[str], elements: List[Element],
-                          creators: List[User]) -> Comment:
+def create_random_comment(words: List[str], elements: List[Element]) -> Comment:
     """Create comment with text set as random
-    english word from words. Comment's element and user are
-    chosen from elements and creators.
+    english word from words. Comment's element is
+    chosen from elements list and creator is chosen from
+    element's group users.
     """
 
     text = random.choice(words)
-    user = random.choice(creators)
     element = random.choice(elements)
+    user = random.choice(element.tab.group.users.all())
 
     return create_comment(text, user, element)
 
 
-def create_random_element(words: List[str], tabs: List[Tab],
-                          creators: List[User]) -> Element:
+def create_random_element(words: List[str], tabs: List[Tab]) -> Element:
     """Create element with name and text set as random
-    english word from words. Element's tab and user are
-    chosen from tabs and creators.
+    english word from words. Element's tab is chosen from
+    tabs list and creator is chosen from tab's group users.
     """
 
     name = random.choice(words)
     text = random.choice(words)
-    user = random.choice(creators)
     tab = random.choice(tabs)
+    user = random.choice(tab.group.users.all())
 
     return create_element(name, text, user, tab)
 
 
-def create_random_tab(words: List[str], groups: List[Group],
-                      creators: List[User]) -> Tab:
+def create_random_tab(words: List[str], groups: List[Group]) -> Tab:
     """Create tab with name set as random english word from words.
-    Tab's group and user are chosen from groups and creators.
+    Tab's group is chosen from groups list and creator is
+    chosen from group's users.
     """
 
     name = random.choice(words)
-    user = random.choice(creators)
     group = random.choice(groups)
+    user = random.choice(group.users.all())
 
     return create_tab(name, user, group)
 
