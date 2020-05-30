@@ -2,7 +2,8 @@
 
 {% block content %}
     <h2>Welcome!</h2>
-    <h4>I created this web platform to help students share their knowledge and homework</h4>
-    <h4>Feel free to use it with your schoolmates!</h4>
-    <h2>You need to be logged in.</h2>
+    <h4>
+        <a href="{% url 'login_view' %}">Log in</a> or see
+        <a href="{% url 'how_to_view' %}">how it works</a> to start.
+    </h4>
 {% endblock %}
