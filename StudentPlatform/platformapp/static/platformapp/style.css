@@ -1,5 +1,5 @@
-body{
-    margin-top:20px;
+body {
+    margin-top: 20px;
 }
 
 #group_name {
@@ -7,11 +7,11 @@ body{
     font-size: 1.5rem;
 }
 
-#edit_group{
+#edit_group {
     color: lightgrey;
 }
 
-#create_tab{
+#create_tab {
     color: dimgrey;
     font-size: 1.25rem
 }
@@ -19,19 +19,19 @@ body{
 /* Comments */
 
 .comment-wrapper .panel-body {
-    max-height:650px;
-    overflow:auto;
+    max-height: 650px;
+    overflow: auto;
 }
 
 .comment-wrapper .media-list .media img {
-    width:64px;
-    height:64px;
-    border:2px solid #e5e7e8;
+    width: 64px;
+    height: 64px;
+    border: 2px solid #e5e7e8;
 }
 
 .comment-wrapper .media-list .media {
-    border-bottom:1px dashed #efefef;
-    margin-bottom:25px;
+    border-bottom: 1px dashed #efefef;
+    margin-bottom: 25px;
 }
 
 /* Feed post */
@@ -41,4 +41,8 @@ body{
     padding: 3%;
     background-color: #dddddd;
     border-radius: 8px;
+}
+
+.auth-form {
+    width: 50%;
 }
