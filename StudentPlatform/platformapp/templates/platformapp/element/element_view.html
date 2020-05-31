@@ -4,22 +4,23 @@
 {% block content %}
     {# Back to group button. #}
     <a href="{% url 'group_view' group.pk %}">
-        <button class="btn btn-primary">Back</button>
+        <i class="fas fa-arrow-left"></i>
     </a>
 
-    {% if request.user.id == element.creator.id %}
-        <a href="{% url 'delete_element_view' element.pk %}">
-            <button class="btn btn-danger">Delete post</button>
-        </a>
-        <a href="{% url 'update_element_view' element.pk %}">
-            <button class="btn btn-warning">Edit post</button>
-        </a>
-    {% endif %}
-
+    {# Element name. #}
     <h2>
         {{ element.name }}
+        {% if request.user.id == element.creator.id %}
+            <a href="{% url 'update_element_view' element.pk %}">
+                <i class="fas fa-edit"></i>
+            </a>
+            <a href="{% url 'delete_element_view' element.pk %}">
+                <i class="fas fa-trash-alt"></i>
+            </a>
+        {% endif %}
     </h2>
 
+    {# Creator's info. #}
     <p>
         by <b><i>{{ element.creator.username }}</i></b> at <i>{{ element.created_date }}</i>
         <br>
@@ -28,10 +29,12 @@
         {% endif %}
     </p>
 
+    {# Element's content. #}
     <p>
         {{ element.text }}
     </p>
 
+    {# Element's image. #}
     {% if element.image %}
         <p><img style="max-width: 100%;" src="{{ element.image.url }}"></p>
     {% endif %}
@@ -58,16 +61,19 @@
                         <hr>
 
                         <ul class="media-list">
+                            {# Comments. #}
                             {% for comment in comments %}
                                 <li class="media">
                                     <div class="media-body">
-                                        <strong class="text-success">{{ comment.creator.username }}</strong>
+                                        <strong class="text-success">
+                                            {{ comment.creator.username }}
+                                        </strong>
                                         <span class="text-muted pull-right">
                                             <small class="text-muted">{{ comment.created_date }}</small>
                                         </span>
                                         {% if request.user.id == comment.creator.id %}
                                             <a href="{% url 'delete_comment_view' comment.pk %}">
-                                                <button class="btn btn-danger">Delete</button>
+                                                <i class="fas fa-trash-alt"></i>
                                             </a>
                                         {% endif %}
                                         <p>
@@ -76,6 +82,7 @@
                                     </div>
                                 </li>
                             {% endfor %}
+
                         </ul>
 
                     </div>
