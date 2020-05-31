@@ -2,6 +2,11 @@
 {% load static %}
 
 {% block content %}
+    <h1>News</h1>
+    {% if not entries %}
+        <p>No news yet.</p>
+    {% endif %}
+
     {% for entry, type in entries %}
         <div class="feed-post">
             <p><i>{{ entry.created_date }}</i></p>
