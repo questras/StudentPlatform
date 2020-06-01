@@ -1,12 +1,12 @@
-from django import forms
+from django.forms import ModelForm, Textarea, FileInput
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
-from .models import Group, Tab, Element
+from .models import Group, Tab, Element, Comment
 
 User = get_user_model()
 
 
-class CreateGroupForm(forms.ModelForm):
+class CreateGroupForm(ModelForm):
     """Form for creating new groups"""
 
     class Meta:
@@ -14,7 +14,7 @@ class CreateGroupForm(forms.ModelForm):
         fields = ('name', 'description')
 
 
-class UpdateGroupForm(forms.ModelForm):
+class UpdateGroupForm(ModelForm):
     """Form for updating existing groups."""
 
     class Meta:
@@ -22,7 +22,7 @@ class UpdateGroupForm(forms.ModelForm):
         fields = ('name', 'description')
 
 
-class CreateTabForm(forms.ModelForm):
+class CreateTabForm(ModelForm):
     """Form for creating new tabs"""
 
     class Meta:
@@ -30,14 +30,28 @@ class CreateTabForm(forms.ModelForm):
         fields = ('name',)
 
 
-class CreateElementForm(forms.ModelForm):
+class CreateElementForm(ModelForm):
     """Form for creating new elements."""
 
     class Meta:
         model = Element
         fields = ('name', 'text', 'image',)
         widgets = {
-            'image': forms.FileInput(),
+            'image': FileInput(),
+        }
+
+
+class CreateCommentForm(ModelForm):
+    """Form for creating new comments."""
+
+    class Meta:
+        model = Comment
+        fields = ('text',)
+        labels = {
+            'text': '',
+        }
+        widgets = {
+            'text': Textarea(attrs={'cols': 80, 'rows': 7}),
         }
 
 
