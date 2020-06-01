@@ -131,3 +131,11 @@ ul ul a {
     min-height: 100vh;
     transition: all 0.3s;
 }
+
+.card {
+    width: 50%;
+}
+
+.edit-form {
+    width: 50%;
+}
