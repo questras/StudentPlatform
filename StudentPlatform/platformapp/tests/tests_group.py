@@ -379,7 +379,5 @@ class SearchGroupsViewTests(TestCase):
         """Test if logged user can access the view."""
 
         utils.create_user_and_authenticate(self)
-        data = {'search_query': 'test'}
-        utils.test_can_access(self, self.url,
-                              post_redirect_url=None,
-                              data=data)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)

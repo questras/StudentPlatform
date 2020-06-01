@@ -2,7 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.http import HttpResponseBadRequest
 
-from ..models import Group, Element, Comment
+from ..forms import CreateCommentForm
+from ..models import Element, Comment
 
 
 @login_required
@@ -17,9 +18,10 @@ def add_comment_view(request, e_pk):
         return redirect(reverse('my_groups_view'))
 
     if request.method == 'POST':
-        if 'text' in request.POST.keys():
+        form = CreateCommentForm(request.POST)
+        if form.is_valid():
             comment = Comment(
-                text=request.POST['text'],
+                text=form.cleaned_data['text'],
                 creator=request.user,
                 element=element,
             )

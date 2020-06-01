@@ -4,8 +4,8 @@ from django.http import HttpResponseBadRequest
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
-from ..forms import CreateElementForm
-from ..models import Group, Tab, Element
+from ..forms import CreateElementForm, CreateCommentForm
+from ..models import Tab, Element
 
 User = get_user_model()
 
@@ -139,6 +139,7 @@ def element_view(request, pk):
         'tab': tab,
         'element': element,
         'comments': comments,
+        'comment_form': CreateCommentForm,
     }
 
     return render(request, 'platformapp/element/element_view.html', context)

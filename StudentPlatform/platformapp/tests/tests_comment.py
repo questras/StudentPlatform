@@ -58,6 +58,16 @@ class AddCommentViewTests(TestCase):
 
         utils.test_cannot_post_with_empty_fields(self, self.url, fields)
 
+    def test_cannot_add_empty_comment(self):
+        """Test if cannot add comment with text as empty string."""
+
+        utils.create_user_and_authenticate(self)
+        self.group.users.add(self.logged_user)
+
+        response = self.client.post(self.url, data={'text': ''})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(len(Comment.objects.all()), 0)
+
 
 class DeleteCommentViewTests(TestCase):
     """Tests for delete_comment_view."""

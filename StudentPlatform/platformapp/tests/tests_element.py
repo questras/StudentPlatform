@@ -92,13 +92,15 @@ class CreateElementViewTests(TestCase):
 
         utils.create_user_and_authenticate(self)
         self.group.users.add(self.logged_user)
-        # 1 is id of created element in the future.
-        post_expected_url = reverse('element_view', args=(1,))
 
-        utils.test_can_access(self, self.url,
-                              post_redirect_url=post_expected_url,
-                              data=self.data)
-        self.assertEqual(len(Element.objects.all()), 1)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post(self.url, self.data)
+        elements = Element.objects.all()
+        self.assertEqual(len(elements), 1)
+        redirect_url = reverse('element_view', args=(elements[0].pk,))
+        self.assertRedirects(response, redirect_url)
 
     def test_cannot_create_element_with_empty_field(self):
         """Test if cannot create element with
