@@ -139,3 +139,20 @@ ul ul a {
 .edit-form {
     width: 50%;
 }
+
+.feed-post {
+    width: 40%;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #b6c1ec;
+    border-radius: 5px;
+}
+
+.feed-date {
+    font-size: large;
+    margin-bottom: 5%;
+}
+
+.feed-content {
+    font-size: medium;
+}

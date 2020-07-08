@@ -3,14 +3,19 @@
 
 {% block content %}
     <h1>News</h1>
+    <br>
+
     {% if not entries %}
         <p>No news yet.</p>
     {% endif %}
 
     {% for entry, type in entries %}
         <div class="feed-post">
-            <p><i>{{ entry.created_date }}</i></p>
-            <p>
+            <div class="feed-date">
+                <i>{{ entry.created_date }}</i>
+            </div>
+
+            <div class="feed-content">
                 <b>{{ entry.creator.username }}</b> added
                 {% if type == 'Tab' %}
                     new Tab <b>{{ entry.name }}</b> in Group
@@ -36,7 +41,7 @@
                         <b>{{ entry.element.tab.group.name }}</b>
                     </a>
                 {% endif %}
-            </p>
+            </div>
         </div>
     {% endfor %}
 {% endblock %}
