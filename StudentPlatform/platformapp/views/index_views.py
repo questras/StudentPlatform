@@ -33,7 +33,10 @@ def feed_view(request):
     entries = tabs + elements + comments
     # Sort all objects by descending date.
     entries = sorted(entries, key=lambda x: x.created_date, reverse=True)
-    # Create pairs of object and its time.
+    # Take no more than 50 entries.
+    if len(entries) > 50:
+        entries = entries[:50]
+    # Create pairs of objects and their class names.
     entries = [(entry, entry.__class__.__name__) for entry in entries]
 
     context = {
