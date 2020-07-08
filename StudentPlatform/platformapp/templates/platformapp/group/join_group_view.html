@@ -1,13 +1,23 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>{{ group.name }}</h2>
-    <h3>Description: {{ group.description }}</h3>
-    <h4>Creator: {{ group.creator.username }}</h4>
-    <h5>Would you like to join this group?</h5>
+<div id="join-group">
+    <h1>{{ group.name }}</h1>
+    <div>
+        <b>Description:</b> {{ group.description }}
+    </div>
+
+    <div>
+        <b>Creator:</b> {{ group.creator.username }}
+    </div>
+
+    Would you like to join this group?
     <form action="{% url 'join_group_view' group.pk %}" method="post">
         {% csrf_token %}
         <button type="submit" class="btn btn-success">Join</button>
+        <a href="{% url 'my_groups_view' %}">
+            <button class="btn btn-danger">Cancel</button>
+        </a>
     </form>
-    <a href="{% url 'my_groups_view' %}"><button class="btn btn-danger">Cancel</button></a>
+</div>
 {% endblock %}
