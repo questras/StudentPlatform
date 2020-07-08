@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from . import secret
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '+s&yo=jlw+0qveeg8+r_btijs=p6#40q=%hl3!jdz(os7!dxk5'
+SECRET_KEY = secret.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -74,13 +75,12 @@ WSGI_APPLICATION = 'StudentPlatform.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DB_PASSWORD = open('dbpassword.txt').read()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'studentplatform',
-        'USER': 'platformuser',
-        'PASSWORD': DB_PASSWORD,
+        'NAME': secret.DB_NAME,
+        'USER': secret.DB_USER,
+        'PASSWORD': secret.DB_PASSWORD,
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -129,7 +129,6 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Login and logout redirect urls
-
 LOGIN_URL = '/platformapp/auth/login/'
 LOGIN_REDIRECT_URL = '/platformapp/feed/'
 LOGOUT_REDIRECT_URL = '/platformapp/'
