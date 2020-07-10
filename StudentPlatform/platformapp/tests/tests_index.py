@@ -50,10 +50,10 @@ class FeedViewTests(TestCase):
         groups and groups' tabs, elements and comments."""
 
         other_user = scripts.create_user('other', 'other')
-        utils.create_user_and_authenticate(self)
+        logged_user = utils.create_user_and_authenticate(self)
 
         seen_group = scripts.create_group('seen', 'seen', other_user)
-        seen_group.users.add(self.logged_user)
+        seen_group.users.add(logged_user)
         unseen_group = scripts.create_group('unseen', 'unseen', other_user)
 
         seen_tab = scripts.create_tab('seen', other_user, seen_group)

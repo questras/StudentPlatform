@@ -27,7 +27,7 @@ class CreateGroupViewTests(TestCase):
     def test_logged_can_create_group(self):
         """Test if logged user can create group."""
 
-        utils.create_user_and_authenticate(self)
+        logged_user = utils.create_user_and_authenticate(self)
         utils.test_can_access(self, self.url,
                               post_redirect_url=reverse('my_groups_view'),
                               data=self.data)
@@ -36,7 +36,7 @@ class CreateGroupViewTests(TestCase):
         self.assertEqual(len(groups), 1)
         self.assertEqual(groups[0].name, self.data['name'])
         self.assertEqual(groups[0].description, self.data['description'])
-        self.assertEqual(groups[0].creator, self.logged_user)
+        self.assertEqual(groups[0].creator, logged_user)
         self.assertEqual(len(groups[0].users.all()), 1)
 
     def test_cannot_create_group_with_empty_field(self):
@@ -79,8 +79,8 @@ class UpdateGroupViewTests(TestCase):
         """Test if user who is not a creator of group cannot update
         and is redirected to my_groups_view."""
 
-        utils.create_user_and_authenticate(self)
-        self.group.users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.group.users.add(logged_user)
         expected_url = reverse('my_groups_view')
 
         utils.test_cannot_access(self, self.url,
@@ -144,8 +144,8 @@ class DeleteGroupViewTests(TestCase):
         """Test if user who is not a creator of group cannot delete
         and is redirected to my_groups_view."""
 
-        utils.create_user_and_authenticate(self)
-        self.group.users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.group.users.add(logged_user)
         expected_url = reverse('my_groups_view')
 
         utils.test_cannot_access(self, self.url, expected_url)
@@ -187,8 +187,8 @@ class GroupViewTests(TestCase):
     def test_user_in_group_can_access(self):
         """Test if user in the group can access the group's view."""
 
-        utils.create_user_and_authenticate(self)
-        self.group.users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.group.users.add(logged_user)
 
         utils.test_can_access(self, self.url)
 
@@ -216,16 +216,16 @@ class GroupMembersViewTests(TestCase):
     def test_logged_user_in_group_can_access(self):
         """Test if logged user in group can access."""
 
-        utils.create_user_and_authenticate(self)
-        self.group.users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.group.users.add(logged_user)
 
         utils.test_can_access(self, self.url)
 
     def test_all_users_in_group_are_seen(self):
         """Test if all users in group are in view's context."""
 
-        utils.create_user_and_authenticate(self)
-        self.group.users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.group.users.add(logged_user)
 
         test_users_in_group = []
         test_users_not_in_group = []
@@ -245,7 +245,7 @@ class GroupMembersViewTests(TestCase):
         response = self.client.get(self.url)
         members = response.context['group'].users.all()
 
-        self.assertIn(self.logged_user, members)
+        self.assertIn(logged_user, members)
 
         for user in test_users_in_group:
             self.assertIn(user, members)
@@ -270,14 +270,14 @@ class JoinGroupViewTests(TestCase):
     def test_logged_user_can_join(self):
         """Test if logged user can join group."""
 
-        utils.create_user_and_authenticate(self)
+        logged_user = utils.create_user_and_authenticate(self)
         expected_url = reverse('my_groups_view')
 
         utils.test_can_access(self, self.url,
                               post_redirect_url=expected_url)
 
-        self.assertIn(self.logged_user, self.group.users.all())
-        self.assertIn(self.group, self.logged_user.joined_groups.all())
+        self.assertIn(logged_user, self.group.users.all())
+        self.assertIn(self.group, logged_user.joined_groups.all())
 
     def test_logged_user_already_joined_is_redirected(self):
         """Test if logged user who already joined
@@ -312,9 +312,10 @@ class MyGroupsViewTests(TestCase):
     def test_logged_user_see_only_joined_groups(self):
         """Test if logged user see only joined groups."""
 
-        utils.create_two_users_authenticate_one(self)
-        seen = scripts.create_group('seen', 'seen', self.logged_user)
-        unseen = scripts.create_group('unseen', 'unseen', self.not_logged_user)
+        logged_user, not_logged_user = \
+            utils.create_two_users_authenticate_one(self)
+        seen = scripts.create_group('seen', 'seen', logged_user)
+        unseen = scripts.create_group('unseen', 'unseen', not_logged_user)
 
         response = self.client.get(self.url)
         seen_groups = response.context['groups']
@@ -340,28 +341,28 @@ class LeaveGroupViewTests(TestCase):
     def test_logged_user_in_group_can_leave(self):
         """Test if logged user in group can leave it."""
 
-        utils.create_user_and_authenticate(self)
-        self.group.users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.group.users.add(logged_user)
         expected_url = reverse('my_groups_view')
 
         utils.test_can_access(self, self.url,
                               post_redirect_url=expected_url)
 
-        self.assertNotIn(self.logged_user, self.group.users.all())
-        self.assertNotIn(self.group, self.logged_user.joined_groups.all())
+        self.assertNotIn(logged_user, self.group.users.all())
+        self.assertNotIn(self.group, logged_user.joined_groups.all())
 
     def test_logged_user_not_in_group_is_redirected(self):
         """Test if logged user not in group is redirected."""
 
-        utils.create_user_and_authenticate(self)
+        logged_user = utils.create_user_and_authenticate(self)
 
         response = self.client.get(self.url)
         self.assertRedirects(response, reverse('my_groups_view'))
 
         response = self.client.post(self.url)
         self.assertRedirects(response, reverse('my_groups_view'))
-        self.assertNotIn(self.logged_user, self.group.users.all())
-        self.assertNotIn(self.group, self.logged_user.joined_groups.all())
+        self.assertNotIn(logged_user, self.group.users.all())
+        self.assertNotIn(self.group, logged_user.joined_groups.all())
 
 
 class SearchGroupsViewTests(TestCase):

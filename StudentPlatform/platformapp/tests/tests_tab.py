@@ -37,8 +37,8 @@ class CreateTabViewTests(TestCase):
     def test_user_in_group_can_create_tab(self):
         """Test if user in group can create tab."""
 
-        utils.create_user_and_authenticate(self)
-        self.group.users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.group.users.add(logged_user)
         expected_url = reverse('group_view', args=(self.group.pk,))
 
         utils.test_can_access(self, self.url,
@@ -49,8 +49,8 @@ class CreateTabViewTests(TestCase):
     def test_cannot_create_tab_with_empty_field(self):
         """Test if cannot create tab with empty field."""
 
-        utils.create_user_and_authenticate(self)
-        self.group.users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.group.users.add(logged_user)
         tab_fields = ['name']
 
         utils.test_cannot_post_with_empty_fields(self, self.url, tab_fields)
@@ -89,8 +89,8 @@ class UpdateTabViewTests(TestCase):
         """Test if user who is not a creator of the tab cannot update
         and is redirected to current group view."""
 
-        utils.create_user_and_authenticate(self)
-        self.group.users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.group.users.add(logged_user)
         expected_url = reverse('group_view', args=(self.group.pk,))
 
         utils.test_cannot_access(self, self.url, expected_url, self.data)
@@ -152,8 +152,8 @@ class DeleteTabViewTests(TestCase):
         """Test if user who is not a creator of the tab cannot delete
         and is redirected to current group view."""
 
-        utils.create_user_and_authenticate(self)
-        self.group.users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.group.users.add(logged_user)
         expected_url = reverse('group_view', args=(self.group.pk,))
 
         utils.test_cannot_access(self, self.url, expected_url)

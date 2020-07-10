@@ -39,8 +39,8 @@ class AddCommentViewTests(TestCase):
     def test_logged_in_group_can_add_comment(self):
         """Test if logged user in element's group can add comment."""
 
-        utils.create_user_and_authenticate(self)
-        self.group.users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.group.users.add(logged_user)
         expected_url = reverse('element_view', args=(self.element.pk,))
 
         utils.test_can_access(self, self.url,
@@ -52,8 +52,8 @@ class AddCommentViewTests(TestCase):
     def test_cannot_add_comment_with_empty_field(self):
         """Test if cannot add comment with empty text field."""
 
-        utils.create_user_and_authenticate(self)
-        self.group.users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.group.users.add(logged_user)
         fields = ['text']
 
         utils.test_cannot_post_with_empty_fields(self, self.url, fields)
@@ -61,8 +61,8 @@ class AddCommentViewTests(TestCase):
     def test_cannot_add_empty_comment(self):
         """Test if cannot add comment with text as empty string."""
 
-        utils.create_user_and_authenticate(self)
-        self.group.users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.group.users.add(logged_user)
 
         response = self.client.post(self.url, data={'text': ''})
         self.assertEqual(response.status_code, 400)
@@ -100,8 +100,8 @@ class DeleteCommentViewTests(TestCase):
         """Test if logged user in comment's group who is not
         comment's creator cannot delete the comment."""
 
-        utils.create_user_and_authenticate(self)
-        self.group.users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.group.users.add(logged_user)
         expected_url = reverse('element_view', args=(self.element.pk,))
 
         utils.test_cannot_access(self, self.url, expected_url)

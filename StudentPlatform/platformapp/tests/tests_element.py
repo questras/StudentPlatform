@@ -90,8 +90,8 @@ class CreateElementViewTests(TestCase):
     def test_logged_user_in_group_can_create_element(self):
         """Test if logged user in group can create new element."""
 
-        utils.create_user_and_authenticate(self)
-        self.group.users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.group.users.add(logged_user)
 
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
@@ -106,8 +106,8 @@ class CreateElementViewTests(TestCase):
         """Test if cannot create element with
         empty name or text field."""
 
-        utils.create_user_and_authenticate(self)
-        self.group.users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.group.users.add(logged_user)
         element_fields = ['name', 'text']
 
         utils.test_cannot_post_with_empty_fields(self, self.url,
@@ -143,8 +143,8 @@ class UpdateElementViewTests(TestCase):
         """Test if logged user in element's group who is not
         element's creator cannot access view."""
 
-        utils.create_user_and_authenticate(self)
-        self.args['group'].users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.args['group'].users.add(logged_user)
         expected_url = reverse('element_view', args=(self.args['element'].pk,))
 
         utils.test_cannot_access(self, self.args['url'],
@@ -212,8 +212,8 @@ class DeleteElementViewTests(TestCase):
         """Test if logged user in element's group who is not
         element's creator cannot access view."""
 
-        utils.create_user_and_authenticate(self)
-        self.args['group'].users.add(self.logged_user)
+        logged_user = utils.create_user_and_authenticate(self)
+        self.args['group'].users.add(logged_user)
         expected_url = reverse('element_view', args=(self.args['element'].pk,))
 
         utils.test_cannot_access(self, self.args['url'],
