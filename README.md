@@ -1,2 +1,19 @@
 # StudentPlatform
-A web platform that lets students log in and share knowledge/ideas/homework through groups. Using Python, Django, Bootstrap4. 
+Web platform for students to share knowledge and homework.
+
+Features:
+- Authentication.
+- Creating, editing, deleting groups.
+- Joining to existing groups.
+- Creating, editing, deleting tabs in joined groups.
+- Creating, editing, deleting posts in tabs in joined groups.
+- Commenting on posts.
+
+Technology used:
+- Python 3
+- Django 3
+- JavaScript
+- Bootstrap4
+- HTML
+- CSS
+- PostgreSQL
