@@ -12,7 +12,6 @@ Features:
 Technology used:
 - Python 3
 - Django 3
-- JavaScript
 - Bootstrap4
 - HTML
 - CSS
