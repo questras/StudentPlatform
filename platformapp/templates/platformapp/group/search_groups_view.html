@@ -30,7 +30,7 @@
                         {% if request.user in group.users.all %}
                             Already joined.
                         {% else %}
-                            <a href="{% url 'join_group_view' group.pk %}">{% url 'join_group_view' group.pk %}</a>
+                            {% include 'platformapp/group/_join_group_url.html' %}
                         {% endif %}
 
                     </td>

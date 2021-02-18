@@ -18,7 +18,9 @@
             <td><a href="{% url 'group_view' group.pk %}">{{ group.name }}</a></td>
             <td>{{ group.description }}</td>
             <td>{{ group.creator.username }}</td>
-            <td><a href="{% url 'join_group_view' group.pk %}">{% url 'join_group_view' group.pk %}</a></td>
+            <td>
+                {% include 'platformapp/group/_join_group_url.html' %}
+            </td>
             <td>
                 {% if request.user.id == group.creator.id %}
                 <a href="{% url 'delete_group_view' group.pk %}">

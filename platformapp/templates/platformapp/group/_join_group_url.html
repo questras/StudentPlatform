@@ -1,0 +1,3 @@
+<a href="{% url 'join_group_view' group.pk %}">
+    {{ request.scheme }}://{{ request.META.HTTP_HOST }}{% url 'join_group_view' group.pk %}
+</a>
