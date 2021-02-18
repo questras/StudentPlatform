@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 
 from .. import scripts
 
@@ -23,7 +24,6 @@ def feed_view(request):
     elements and comments related to user."""
 
     user = request.user
-
     groups = list(user.joined_groups.all())
     tabs = scripts.get_all_tabs_from_groups(groups)
     elements = scripts.get_all_elements_from_tabs(tabs)
@@ -33,14 +33,17 @@ def feed_view(request):
     entries = tabs + elements + comments
     # Sort all objects by descending date.
     entries = sorted(entries, key=lambda x: x.created_date, reverse=True)
-    # Take no more than 50 entries.
-    if len(entries) > 50:
-        entries = entries[:50]
+
     # Create pairs of objects and their class names.
     entries = [(entry, entry.__class__.__name__) for entry in entries]
 
+    posts_on_one_page = 10
+    paginator = Paginator(entries, posts_on_one_page)
+    page_number = request.GET.get('page') or 1
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'entries': entries,
+        'page_obj': page_obj,
     }
 
     return render(request, 'platformapp/index/feed_view.html', context)

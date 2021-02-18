@@ -5,11 +5,13 @@
     <h1>News</h1>
     <br>
 
-    {% if not entries %}
+    {% include 'platformapp/index/_page_obj_links.html' %}
+
+    {% if not page_obj %}
         <p>No news yet.</p>
     {% endif %}
 
-    {% for entry, type in entries %}
+    {% for entry, type in page_obj %}
         <div class="feed-post">
             <div class="feed-date">
                 <i>{{ entry.created_date }}</i>
@@ -44,4 +46,6 @@
             </div>
         </div>
     {% endfor %}
+
+    {% include 'platformapp/index/_page_obj_links.html' %}
 {% endblock %}
