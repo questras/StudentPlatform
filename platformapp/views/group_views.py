@@ -184,9 +184,9 @@ def search_groups_view(request):
         query = request.POST['search_query']
         if query != '':
             search_result = Group.objects.filter(
-                Q(name__trigram_similar=query) |
-                Q(description__trigram_similar=query) |
-                Q(creator__username__trigram_similar=query)
+                Q(name__icontains=query) |
+                Q(description__icontains=query) |
+                Q(creator__username__icontains=query)
             )
             context['search_result'] = search_result
 
