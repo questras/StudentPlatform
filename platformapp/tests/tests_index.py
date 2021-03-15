@@ -72,7 +72,7 @@ class FeedViewTests(TestCase):
         unseen_objects = [unseen_tab, unseen_element, unseen_comment]
 
         response = self.client.get(self.url)
-        objects = [obj[0] for obj in response.context['entries']]
+        objects = [obj[0] for obj in response.context['page_obj']]
         for o in seen_objects:
             self.assertIn(o, objects)
         for o in unseen_objects:
